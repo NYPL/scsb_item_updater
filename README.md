@@ -11,8 +11,9 @@ the staff who initiated the update. (Success / failure)
 
 
 
-## Installing & Running
+## Installing & Running locally
 
+1.  `cp ./config/.env.example ./config/.env`
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
 
