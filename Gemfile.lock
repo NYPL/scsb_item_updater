@@ -1,5 +1,5 @@
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     aws-partitions (1.53.0)
     aws-sdk (3.0.1)

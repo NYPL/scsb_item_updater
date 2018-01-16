@@ -1,4 +1,4 @@
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'aws-sdk', '~> 3.0', '>= 3.0.1'
 gem 'dotenv', '~> 2.2', '>= 2.2.1'
