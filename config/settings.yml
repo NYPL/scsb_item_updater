@@ -2,3 +2,5 @@ aws_key: <%= ENV['AWS_KEY'] %>
 aws_secret: <%= ENV['AWS_SECRET'] %>
 sqs_queue_url: <%= ENV['SQS_QUEUE_URL'] %>
 polling_interval_seconds: <%= ENV['POLLING_INTERVAL_SECONDS'] %>
+scsb_api_url: <%= env['SCSB_API_URL'] %>
+scsb_api_key: <%= env['SCSB_API_KEY'] %>
