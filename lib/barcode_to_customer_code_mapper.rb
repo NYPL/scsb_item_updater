@@ -11,7 +11,6 @@ class BarcodeToCustomerCodeMapper
 
   def barcode_to_customer_code_mapping
     result = {}
-    found  = {}
 
     @barcodes.each do |barcode|
       # default it to nil now, in case it's not found
