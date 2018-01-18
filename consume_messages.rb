@@ -1,5 +1,6 @@
 require 'aws-sdk'
 require File.join(__dir__, 'lib', 'barcode_to_customer_code_mapper')
+require File.join(__dir__, 'lib', 'scsbxml_fetcher')
 
 # Bring environment variables in ./config/.env into scope.
 # This is probably only used in development.
@@ -25,6 +26,15 @@ poller.poll(poll_options) do |messages|
     puts "Message body: #{message.body} with attributes #{message.attributes} and user_attributes of #{message.message_attributes}\n"
     parsed_message = JSON.parse(message.body)
     mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url:  settings['scsb_api_url'], api_key: settings['scsb_api_key']})
-    puts "MAPPING of barcodes to customerCodes: #{mapper.barcode_to_customer_code_mapping}"
+    mapping = mapper.barcode_to_customer_code_mapping
+    puts "MAPPING of barcodes to customerCodes: #{mapping}"
+    xml_fetcher = SCSBXMLFetcher.new({
+      oauth_key:    settings['nypl_oauth_key'],
+      oauth_url:    settings['nypl_oauth_url'],
+      oauth_secret: settings['nypl_oauth_secret'],
+      platform_api_url: settings['platform_api_url'],
+      barcode_to_customer_code_mapping: mapping
+    })
+    puts xml_fetcher.translate_to_scsb_xml
   end
 end
