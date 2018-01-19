@@ -35,6 +35,8 @@ poller.poll(poll_options) do |messages|
       platform_api_url: settings['platform_api_url'],
       barcode_to_customer_code_mapping: mapping
     })
-    puts xml_fetcher.translate_to_scsb_xml
+    boop = xml_fetcher.translate_to_scsb_xml
+    puts "This will have #{boop.keys.length} keys"
+    puts boop
   end
 end
