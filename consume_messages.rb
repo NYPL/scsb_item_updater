@@ -11,6 +11,9 @@ Dotenv.load(File.join('.', 'config', '.env'))
 require 'erb'
 require 'yaml'
 
+require 'nypl_log_formatter'
+logger = NyplLogFormatter.new(STDOUT)
+
 path_to_settings = File.join(__dir__, "config", "settings.yml")
 settings = YAML.load(ERB.new(File.read(path_to_settings)).result)
 
@@ -40,7 +43,7 @@ poller.poll(poll_options) do |messages|
       puts "This will have #{boop.keys.length} keys"
       puts boop
     else
-      puts 'log an error and delete this message'
+      logger.error('something is wrong')
     end
   end
 end
