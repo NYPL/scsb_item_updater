@@ -25,18 +25,22 @@ poller.poll(poll_options) do |messages|
   messages.each do |message|
     puts "Message body: #{message.body} with attributes #{message.attributes} and user_attributes of #{message.message_attributes}\n"
     parsed_message = JSON.parse(message.body)
-    mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url:  settings['scsb_api_url'], api_key: settings['scsb_api_key']})
-    mapping = mapper.barcode_to_customer_code_mapping
-    puts "MAPPING of barcodes to customerCodes: #{mapping}"
-    xml_fetcher = SCSBXMLFetcher.new({
-      oauth_key:    settings['nypl_oauth_key'],
-      oauth_url:    settings['nypl_oauth_url'],
-      oauth_secret: settings['nypl_oauth_secret'],
-      platform_api_url: settings['platform_api_url'],
-      barcode_to_customer_code_mapping: mapping
-    })
-    boop = xml_fetcher.translate_to_scsb_xml
-    puts "This will have #{boop.keys.length} keys"
-    puts boop
+    if parsed_message['action'] && parsed_message['action'] == 'sync'
+      mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url:  settings['scsb_api_url'], api_key: settings['scsb_api_key']})
+      mapping = mapper.barcode_to_customer_code_mapping
+      puts "MAPPING of barcodes to customerCodes: #{mapping}"
+      xml_fetcher = SCSBXMLFetcher.new({
+        oauth_key:    settings['nypl_oauth_key'],
+        oauth_url:    settings['nypl_oauth_url'],
+        oauth_secret: settings['nypl_oauth_secret'],
+        platform_api_url: settings['platform_api_url'],
+        barcode_to_customer_code_mapping: mapping
+      })
+      boop = xml_fetcher.translate_to_scsb_xml
+      puts "This will have #{boop.keys.length} keys"
+      puts boop
+    else
+      puts 'log an error and delete this message'
+    end
   end
 end
