@@ -10,13 +10,15 @@ class BarcodeToCustomerCodeMapper
   end
 
   def barcode_to_customer_code_mapping
-    find_all_barcodes(@barcodes, {page: 1})
+    initial_results = {}
+    @barcodes.each {|barcode| initial_results[barcode.to_s] = nil }
+    find_all_barcodes(@barcodes, {page_number: 0}, initial_results)
   end
 
 private
 
   def find_all_barcodes(barcodes, options = {}, result = {})
-    response = HTTParty.post("#{@api_url}/searchService/search", headers: auth_headers, body: barcode_request_body(barcodes.join(',')))
+    response = HTTParty.post("#{@api_url}/searchService/search", headers: auth_headers, body: barcode_request_body(barcodes.join(','), options[:page_number]))
     parsed_body = JSON.parse(response.body)
     parsed_body['searchResultRows'].each do |result_row|
       # guard against the off-chance SCSB returns barcode that wasn't requested
@@ -25,10 +27,11 @@ private
       end
     end
 
-    if options[:page] == response['totalPageCount']
+    # parsed_body['totalPageCount']-1 because SCSB's pageSize params seems to be 0-indexed
+    if options[:page_number] == parsed_body['totalPageCount']-1 || parsed_body['totalPageCount'] == 0
       return result
     else
-      find_all_barcodes(@barcodes, {page: options[:page] + 1}, result)
+      find_all_barcodes(@barcodes, {page_number: options[:page_number] + 1}, result)
     end
 
   end
@@ -41,18 +44,17 @@ private
     }
   end
 
-  def barcode_request_body(barcode)
+  def barcode_request_body(barcode, page_number = 1)
     body = {
       deleted: false,
       fieldName: "Barcode",
       owningInstitutions: ["NYPL"],
       collectionGroupDesignations: ["NA"],
       catalogingStatus: "Incomplete",
-      pageNumber: 0,
+      pageNumber: page_number,
       pageSize: 30,
       fieldValue: barcode.to_s
     }
-
     JSON.generate(body)
   end
 end
