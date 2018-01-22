@@ -26,7 +26,7 @@ poller.poll(poll_options) do |messages|
     puts "Message body: #{message.body} with attributes #{message.attributes} and user_attributes of #{message.message_attributes}\n"
     parsed_message = JSON.parse(message.body)
     if parsed_message['action'] && parsed_message['action'] == 'sync'
-      mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url:  settings['scsb_api_url'], api_key: settings['scsb_api_key']})
+      mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url: settings['scsb_api_url'], api_key: settings['scsb_api_key']})
       mapping = mapper.barcode_to_customer_code_mapping
       puts "MAPPING of barcodes to customerCodes: #{mapping}"
       xml_fetcher = SCSBXMLFetcher.new({
