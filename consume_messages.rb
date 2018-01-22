@@ -1,6 +1,7 @@
 require 'aws-sdk'
 require File.join(__dir__, 'lib', 'barcode_to_customer_code_mapper')
 require File.join(__dir__, 'lib', 'scsbxml_fetcher')
+require File.join(__dir__, 'lib', 'submit_collection_updater')
 
 # Bring environment variables in ./config/.env into scope.
 # This is probably only used in development.
@@ -38,7 +39,17 @@ poller.poll(poll_options) do |messages|
       })
       boop = xml_fetcher.translate_to_scsb_xml
       puts "This will have #{boop.keys.length} keys"
-      puts boop
+      puts "the barcode to SCSBXML matching is #{boop}"
+
+      submit_collection_updater = SubmitCollectionUpdater.new(
+          barcode_to_scsb_xml_mapping: boop,
+          api_url: settings['scsb_api_url'],
+          api_key: settings['scsb_api_key'],
+          is_gcd_protected: false,
+      )
+
+      submit_collection_updater.update_scsb_items
+
     else
       puts 'log an error and delete this message'
     end
