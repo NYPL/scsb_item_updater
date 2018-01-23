@@ -2,6 +2,7 @@ require 'oauth2'
 require 'httparty'
 
 class SCSBXMLFetcher
+
   # options is a hash used to instantiate a SCSBXMLFetcher
   #  options token [String]
   #  options oauth_url [String]
