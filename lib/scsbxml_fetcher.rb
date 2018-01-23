@@ -1,5 +1,7 @@
 require 'oauth2'
 require 'httparty'
+require 'nypl_log_formatter'
+logger = NyplLogFormatter.new(STDOUT)
 
 class SCSBXMLFetcher
   # options is a hash used to instantiate a SCSBXMLFetcher
@@ -29,6 +31,8 @@ class SCSBXMLFetcher
             query: {customerCode: customer_code, barcode: barcode, includeFullBibTree: 'false'},
             headers: {"Authorization" =>  "Bearer #{@oauth_token}"}
           ).body
+      else
+        logger.error("Not valid customer code for the barcode: #{barcode}." )
       end
     end
 

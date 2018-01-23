@@ -43,7 +43,7 @@ poller.poll(poll_options) do |messages|
       puts "This will have #{boop.keys.length} keys"
       puts boop
     else
-      logger.error('something is wrong')
+      logger.error("Not valid action from Simple Queue Service.")
     end
   end
 end
