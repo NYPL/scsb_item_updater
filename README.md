@@ -1,6 +1,6 @@
 # SCSB Item Updater
 
-This app consumes messages produced by [TODO: Link to Web APP].
+This app consumes messages produced by [NYPL/nypl-recap-admin](https://github.com/NYPL/nypl-recap-admin).  
 It pushes updated item information (from our platform) into SCSB's system via
 SCSB's API.
 
