@@ -36,9 +36,9 @@ private
   end
 
   def update_item(barcode, scsb_xml)
-    # Remove <xml version=... tag 
+    # Remove <xml version=... tag
     stripped_doc = Nokogiri::XML(scsb_xml).root.to_s
-    response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: false})
+    response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: @is_gcd_protected})
     puts "sent barcode #{barcode} to submitCollection. The response was #{response.body}"
   end
 
