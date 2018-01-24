@@ -1,0 +1,151 @@
+<?xml version="1.0" ?>
+  <bibRecords>
+    <bibRecord>
+      <bib>
+        <owningInstitutionId>NYPL</owningInstitutionId>
+        <owningInstitutionBibId>.b136881269</owningInstitutionBibId>
+        <content>
+          <collection xmlns="http://www.loc.gov/MARC21/slim">
+            <record>
+              <controlfield tag="001">5283422</controlfield>
+              <controlfield tag="003">OCoLC</controlfield>
+              <controlfield tag="005">20000629192541.0</controlfield>
+              <controlfield tag="008">790817s1900    mouc          000 0 eng dcamK  </controlfield>
+              <datafield ind1="1" ind2=" " tag="100">
+                <subfield code="a">Parsons, Lewis B.</subfield>
+                <subfield code="q">(Lewis Baldwin),</subfield>
+                <subfield code="d">1818-1907.</subfield>
+              </datafield>
+              <datafield ind1="2" ind2=" " tag="791">
+                <subfield code="a">New York Genealogical and Biographical Society Collection.</subfield>
+              </datafield>
+              <datafield ind1="8" ind2=" " tag="952">
+                <subfield code="h">APV (Parsons) (Parsons, L. B. Genealogy of the family of Lewis B. Parsons)</subfield>
+              </datafield>
+              <datafield ind1="3" ind2="0" tag="600">
+                <subfield code="a">Parsons family (Joseph Parsons, d. 1683)</subfield>
+              </datafield>
+              <datafield ind1="3" ind2="0" tag="600">
+                <subfield code="a">Hoar family (Joanna Hoare,</subfield>
+                <subfield code="c">Mrs., d. 1651)</subfield>
+              </datafield>
+              <datafield ind1=" " ind2="0" tag="651">
+                <subfield code="a">United States</subfield>
+                <subfield code="x">History</subfield>
+                <subfield code="y">Civil War, 1861-1865.</subfield>
+              </datafield>
+              <datafield ind1="1" ind2=" " tag="541">
+                <subfield code="c">Gift;</subfield>
+                <subfield code="a">New York Genealogical and Biographical Society;</subfield>
+                <subfield code="d">2008.</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="500">
+                <subfield code="a">Parsons--Springfield, Mass., 1636; Hoar--Gloucester, England, 1632.</subfield>
+              </datafield>
+              <datafield ind1="0" ind2=" " tag="505">
+                <subfield code="a">English family of Parsons.--American family.--Genealogy in the maternal line of Hoar.--Recollections of Lewis B. Parsons by [members of his family and Rev. Joseph R. Page]--Tribute by Joseph L. Daniels to Philo Parsons.--The Hoar family in America and its English ancestry.  Extracts from a recent publication by George Frisbie Hoar of Mass.--Rail and river army transportation in the civil war, by Gen. Lewis B. Parsons.</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="260">
+                <subfield code="a">St. Louis,</subfield>
+                <subfield code="b">Perrin &amp; Smith printing co.</subfield>
+                <subfield code="c">[1900].</subfield>
+              </datafield>
+              <datafield ind1="8" ind2=" " tag="952">
+                <subfield code="h">APV (Parsons) (Parsons, L. B. Genealogy of the family of Lewis B. Parsons)</subfield>
+              </datafield>
+              <datafield ind1="8" ind2=" " tag="952">
+                <subfield code="h">NYGB G P 2545</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="300">
+                <subfield code="a">109 p.</subfield>
+                <subfield code="b">ports.</subfield>
+                <subfield code="c">23 cm.</subfield>
+              </datafield>
+              <datafield ind1="0" ind2="0" tag="245">
+                <subfield code="a">Genealogy of the family of Lewis B. Parsons (second.)</subfield>
+                <subfield code="b">Parsons-Hoar ...</subfield>
+                <subfield code="c">[By Lewis B. Parsons].</subfield>
+              </datafield>
+              <datafield ind1="0" ind2=" " tag="799">
+                <subfield code="a">Gift of New York Genealogical and Biographical Society.</subfield>
+                <subfield code="3">Copy in NYGB</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="959">
+                <subfield code="a">.b52535460</subfield>
+                <subfield code="b">11-05-08</subfield>
+                <subfield code="c">05-30-98</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="040">
+                <subfield code="a">SVP</subfield>
+                <subfield code="c">SVP</subfield>
+                <subfield code="d">OCL</subfield>
+                <subfield code="d">NYP</subfield>
+                <subfield code="d">WaOLN</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="049">
+                <subfield code="a">NYPL</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="946">
+                <subfield code="a">r</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="997">
+                <subfield code="a">hh</subfield>
+                <subfield code="b">11-24-00</subfield>
+                <subfield code="c">m</subfield>
+                <subfield code="d">a</subfield>
+                <subfield code="e">-</subfield>
+                <subfield code="f">eng</subfield>
+                <subfield code="g">mou</subfield>
+                <subfield code="h">0</subfield>
+              </datafield>
+              <datafield ind1="0" ind2="0" tag="907">
+                <subfield code="a">.b136881269</subfield>
+              </datafield>
+              <datafield ind1=" " ind2=" " tag="035">
+                <subfield code="a">(OCoLC)5283422</subfield>
+              </datafield>
+              <leader>00000cam  2200313K  4500</leader>
+            </record>
+          </collection>
+        </content>
+      </bib>
+      <holdings>
+        <holding>
+          <owningInstitutionHoldingsId/>
+          <content>
+            <collection xmlns="http://www.loc.gov/MARC21/slim">
+              <record>
+                <datafield ind1="8" ind2=" " tag="852">
+                  <subfield code="b">rcmg2</subfield>
+                  <subfield code="h">APV (Parsons) (Parsons, L. B. Genealogy of the family of Lewis B. Parsons)</subfield>
+                </datafield>
+                <datafield ind1=" " ind2=" " tag="866">
+                  <subfield code="a">1900</subfield>
+                </datafield>
+              </record>
+            </collection>
+          </content>
+          <items>
+            <content>
+              <collection xmlns="http://www.loc.gov/MARC21/slim">
+                <record>
+                  <datafield ind1=" " ind2=" " tag="876">
+                    <subfield code="p">33433111082990</subfield>
+                    <subfield code="h">Supervised Use</subfield>
+                    <subfield code="a">.i165699577</subfield>
+                    <subfield code="j">Available</subfield>
+                    <subfield code="t">1</subfield>
+                    <subfield code="3">1900</subfield>
+                  </datafield>
+                  <datafield ind1=" " ind2=" " tag="900">
+                    <subfield code="a">Private</subfield>
+                    <subfield code="b">NA</subfield>
+                  </datafield>
+                </record>
+              </collection>
+            </content>
+          </items>
+        </holding>
+      </holdings>
+    </bibRecord>
+  </bibRecords>
