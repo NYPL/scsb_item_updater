@@ -2,6 +2,7 @@ aws_key: <%= ENV['AWS_KEY'] %>
 aws_secret: <%= ENV['AWS_SECRET'] %>
 sqs_queue_url: <%= ENV['SQS_QUEUE_URL'] %>
 polling_interval_seconds: <%= ENV['POLLING_INTERVAL_SECONDS'] %>
+minimum_message_age_seconds: <%= ENV['MINIMUM_MESSAGE_AGE_SECONDS'] %>
 scsb_api_url: <%= ENV['SCSB_API_URL'] %>
 scsb_api_key: <%= ENV['SCSB_API_KEY'] %>
 nypl_oauth_key: <%= ENV['NYPL_OAUTH_KEY'] %>
