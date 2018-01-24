@@ -1,7 +1,6 @@
 require 'oauth2'
 require 'httparty'
 require 'nypl_log_formatter'
-logger = NyplLogFormatter.new(STDOUT)
 
 class SCSBXMLFetcher
   # options is a hash used to instantiate a SCSBXMLFetcher
@@ -19,6 +18,7 @@ class SCSBXMLFetcher
     @oauth_secret = options[:oauth_secret]
     @platform_api_url = options[:platform_api_url]
     @barcode_to_customer_code_mapping = options[:barcode_to_customer_code_mapping]
+    @logger = NyplLogFormatter.new(STDOUT)
   end
 
   # returns a hash where the keys are barcodes and the values are SCSBXML Strings
@@ -32,7 +32,7 @@ class SCSBXMLFetcher
             headers: {"Authorization" =>  "Bearer #{@oauth_token}"}
           ).body
       else
-        logger.error("Not valid customer code for the barcode: #{barcode}." )
+        @logger.error("Not valid customer code for the barcode: #{barcode}." )
       end
     end
 
