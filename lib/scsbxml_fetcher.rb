@@ -3,6 +3,7 @@ require 'httparty'
 require 'nypl_log_formatter'
 
 class SCSBXMLFetcher
+
   # options is a hash used to instantiate a SCSBXMLFetcher
   #  options token [String]
   #  options oauth_url [String]
