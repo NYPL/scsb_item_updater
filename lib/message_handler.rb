@@ -1,6 +1,4 @@
-require File.join(__dir__, 'barcode_to_customer_code_mapper')
-require File.join(__dir__, 'scsbxml_fetcher')
-require File.join(__dir__, 'submit_collection_updater')
+Dir[File.join(__dir__, "*.rb")].each {|file| require file }
 require 'nypl_log_formatter'
 
 class MessageHandler
