@@ -13,15 +13,38 @@ The rough workflow for this is, per barcode:
 After the updates - this app will, in some way, shape or form send an email to
 the staff who initiated the update. (Success / failure)
 
-## Dependencies & Requirements
+## Installing & Running
 
-## Installing & Running locally
+### Locally
+
+#### Setup
 
 1.  `cp ./config/.env.example ./config/.env`
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
 
-## Usage
+#### Usage
+
+`ruby ./consume_messages.rb`
+
+### Docker
+
+#### Building a Docker Image
+
+`docker build --no-cache .`
+
+#### Running from Docker build
+
+```
+docker run -e AWS_KEY=*** \
+-e AWS_SECRET=*** \
+-e SQS_QUEUE_URL=*** \
+-e POLLING_INTERVAL_SECONDS=*** \
+...snip
+IMAGENAME-OR-SHA
+```
+
+_...for a complete list of environment variables see `./config/.env`_
 
 ## Deploying
 
