@@ -46,9 +46,8 @@ class MessageHandler
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
       end
     else
-      can_be_processed_at = Time.now.to_i + @settings['minimum_message_age_seconds'].to_i
-      can_be_processed_in = can_be_processed_at - @message.attributes['SentTimestamp']
-      @logger.debug("Message '#{@message.body}' is not old enough to process. It can be processed in #{can_be_processed_in} seconds")
+      can_be_processed_at = (@message.attributes['SentTimestamp'][0..9].to_i + @settings['minimum_message_age_seconds'].to_i) - Time.now.utc.to_i
+      @logger.debug("Message '#{@message.body}' is not old enough to process. It can be processed in #{can_be_processed_at} seconds")
     end
   end
 
@@ -57,7 +56,7 @@ class MessageHandler
   end
 
   def old_enough?
-    seconds_since_publishing = Time.now.to_i - @message.attributes['SentTimestamp'].to_i
+    seconds_since_publishing = Time.now.utc.to_i - @message.attributes['SentTimestamp'][0..9].to_i
     (seconds_since_publishing >= @settings['minimum_message_age_seconds'].to_i)
   end
 end
