@@ -2,6 +2,8 @@ require 'spec_helper'
 
 describe MessageHandler do
 
+  describe "messages that aren't parsable JSON"
+
   describe "allowable actions" do
 
     it "has a whitelist of allowable actions" do
@@ -11,7 +13,7 @@ describe MessageHandler do
   end
 
   it "will log a 'young' message but not try to process it" do
-    fake_message = double(:body => JSON.generate({}), message_attributes: {}, :attributes => {"SentTimestamp" => Time.now.to_i})
+    fake_message = double(:body => JSON.generate({}), message_attributes: {}, :attributes => {"SentTimestamp" => Time.now.to_i.to_s})
     message_handler = MessageHandler.new({message: fake_message, settings: {'minimum_message_age_seconds' => "300"}})
     NyplLogFormatter.any_instance.should_receive(:debug).with("Message '{}' is not old enough to process. It can be processed in 300 seconds")
     message_handler.handle
@@ -20,7 +22,7 @@ describe MessageHandler do
   describe "handling a message with a value for 'action' that is not in the whitelist" do
 
     before do
-      @fake_message = double(:body => JSON.generate({action: 'iamsupported'}), receipt_handle: "some-id", message_attributes: {}, :attributes => {"SentTimestamp" => Time.now.to_i - 86400})
+      @fake_message = double(:body => JSON.generate({action: 'iamsupported'}), receipt_handle: "some-id", message_attributes: {}, :attributes => {"SentTimestamp" => (Time.now.to_i - 86400).to_s})
     end
 
     # TODO: This will be refactored soon to check something like message_handler.errrors includes some string
