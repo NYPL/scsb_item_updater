@@ -10,7 +10,6 @@ describe MessageHandler do
 
   end
 
-  it "will delete message and log an errror if the message isn't valid JSON"
   it "will log a 'young' message but not try to process it" do
     fake_message = double(:body => JSON.generate({}), message_attributes: {}, :attributes => {"SentTimestamp" => Time.now.to_i})
     message_handler = MessageHandler.new({message: fake_message, settings: {'minimum_message_age_seconds' => "300"}})
@@ -19,8 +18,20 @@ describe MessageHandler do
   end
 
   describe "handling a message with a value for 'action' that is not in the whitelist" do
-    it "will log an error"
-    it "will delete the message"
+
+    before do
+      @fake_message = double(:body => JSON.generate({action: 'iamsupported'}), receipt_handle: "some-id", message_attributes: {}, :attributes => {"SentTimestamp" => Time.now.to_i - 86400})
+    end
+
+    # TODO: This will be refactored soon to check something like message_handler.errrors includes some string
+    it "will log an error & delete the message" do
+      fake_sqs_client = double(:delete_message)
+      message_handler = MessageHandler.new({sqs_client: fake_sqs_client, message: @fake_message, settings: {'sqs_queue_url' => 'http://example.com', 'minimum_message_age_seconds' => "300"}})
+      NyplLogFormatter.any_instance.should_receive(:error).with("Message '{\"action\":\"iamsupported\"}' contains an unsupported action")
+      expect(fake_sqs_client).to receive(:delete_message).with(queue_url: 'http://example.com', receipt_handle: "some-id")
+
+      message_handler.handle
+    end
   end
 
 end

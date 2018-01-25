@@ -12,14 +12,15 @@ class MessageHandler
     @sqs_client = options[:sqs_client]
     @logger     = NyplLogFormatter.new(STDOUT)
     @settings   = options[:settings]
+    @parsed_message = {}
   end
 
   def handle
     if old_enough?
       @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
-      parsed_message = JSON.parse(@message.body)
-      if parsed_message['action'] && parsed_message['action'] == 'sync'
-        mapper = BarcodeToCustomerCodeMapper.new({barcodes: parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
+      @parsed_message = JSON.parse(@message.body)
+      if valid?
+        mapper = BarcodeToCustomerCodeMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
         mapping = mapper.barcode_to_customer_code_mapping
         @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
         xml_fetcher = SCSBXMLFetcher.new({
@@ -41,13 +42,18 @@ class MessageHandler
 
         submit_collection_updater.update_scsb_items
       else
-        @logger.error("Not valid action from Simple Queue Service.")
+        @logger.error("Message '#{@message.body}' contains an unsupported action")
+        @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
       end
     else
       can_be_processed_at = Time.now.to_i + @settings['minimum_message_age_seconds'].to_i
       can_be_processed_in = can_be_processed_at - @message.attributes['SentTimestamp']
       @logger.debug("Message '#{@message.body}' is not old enough to process. It can be processed in #{can_be_processed_in} seconds")
     end
+  end
+
+  def valid?
+    (@parsed_message['action'] && VALID_ACTIONS.include?(@parsed_message['action']))
   end
 
   def old_enough?
