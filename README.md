@@ -26,7 +26,7 @@ the staff who initiated the update. (Success / failure)
 ## Usage
 
 1.  `ruby consume_messages.rb`
-2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to true, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to false, it will run the script without updating the barcodes.
+2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
 ## Deploying
 
