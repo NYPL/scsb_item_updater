@@ -15,13 +15,18 @@ class SubmitCollectionUpdater
     @api_url  = options[:api_url]
     @api_key = options[:api_key]
     @is_gcd_protected = options[:is_gcd_protected] || false
+    @is_dry_run = options[:is_dry_run]
   end
 
   # TODO: build up some kind of errors collection
   def update_scsb_items
-    puts "Updating the following #{@barcode_to_scsb_xml_mapping.keys.length} barcodes: #{@barcode_to_scsb_xml_mapping.keys.join(',')}"
-    @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
-      update_item(barcode, scsb_xml)
+    if (@is_dry_run)
+      puts "This is a dry run for development. It will not update any SCSB collection item."
+    else
+      puts "Updating the following #{@barcode_to_scsb_xml_mapping.keys.length} barcodes: #{@barcode_to_scsb_xml_mapping.keys.join(',')}"
+      @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
+        update_item(barcode, scsb_xml)
+      end
     end
   end
 

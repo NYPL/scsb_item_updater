@@ -9,3 +9,4 @@ nypl_oauth_key: <%= ENV['NYPL_OAUTH_KEY'] %>
 nypl_oauth_url: <%= ENV['NYPL_OAUTH_URL'] %>
 nypl_oauth_secret: <%= ENV['NYPL_OAUTH_SECRET'] %>
 platform_api_url: <%= ENV['PLATFORM_API_URL'] %>
+is_dry_run: <%= ENV['IS_DRY_RUN'] %>
