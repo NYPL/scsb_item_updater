@@ -26,6 +26,7 @@ class SubmitCollectionUpdater
       puts "Updating the following #{@barcode_to_scsb_xml_mapping.keys.length} barcodes: #{@barcode_to_scsb_xml_mapping.keys.join(',')}"
       @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
         update_item(barcode, scsb_xml)
+      end
     end
   end
 
