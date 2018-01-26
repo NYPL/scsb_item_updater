@@ -20,9 +20,10 @@ the staff who initiated the update. (Success / failure)
 1.  `cp ./config/.env.example ./config/.env`
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
-1.  `ruby consume_messages.rb`
 
 ## Usage
+
+1.  `ruby consume_messages.rb`
 
 ## Deploying
 
