@@ -38,6 +38,7 @@ class MessageHandler
             api_url: @settings['scsb_api_url'],
             api_key: @settings['scsb_api_key'],
             is_gcd_protected: false,
+            is_dry_run: @settings['is_dry_run'],
         )
 
         submit_collection_updater.update_scsb_items
