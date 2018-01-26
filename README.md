@@ -25,6 +25,8 @@ the staff who initiated the update. (Success / failure)
 
 ## Usage
 
+1.  `ruby consume_messages.rb`
+
 ## Deploying
 
 TODO: Mention Delay
