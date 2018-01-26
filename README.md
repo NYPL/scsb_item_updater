@@ -41,7 +41,7 @@ docker run -e AWS_KEY=*** \
 -e SQS_QUEUE_URL=*** \
 -e POLLING_INTERVAL_SECONDS=*** \
 ...snip
-IMAGENAME-OR-SHA
+[IMAGENAME-OR-SHA]
 ```
 
 _...for a complete list of environment variables see `./config/.env`_
