@@ -1,9 +1,9 @@
 require 'httparty'
 require 'json'
+require 'errorable'
 
 class BarcodeToCustomerCodeMapper
-
-  attr_reader :errors
+  include Errorable
 
   def initialize(options)
     @errors   = {}
@@ -74,14 +74,6 @@ private
       fieldValue: barcode.to_s
     }
     JSON.generate(body)
-  end
-
-  def add_or_append_to_errors(barcode, message)
-    if @errors[barcode]
-      @errors[barcode] << message
-    else
-      @errors[barcode] = [message]
-    end
   end
 
 end
