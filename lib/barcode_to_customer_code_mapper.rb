@@ -15,15 +15,7 @@ class BarcodeToCustomerCodeMapper
   def barcode_to_customer_code_mapping
     initial_results = {}
     @barcodes.each {|barcode| initial_results[barcode.to_s] = nil }
-
-    results = find_all_barcodes(@barcodes, {page_number: 0}, initial_results)
-
-    # Add requested, but unfound barcodes to errors hash
-    results.find_all {|barcode, customer_code| customer_code.nil? }.each do |barcode, customer_code|
-      add_or_append_to_errors(barcode, "Could not found in SCSB's search API")
-    end
-
-    results
+    @results = find_all_barcodes(@barcodes, {page_number: 0}, initial_results)
   end
 
 private
@@ -42,6 +34,11 @@ private
 
       # parsed_body['totalPageCount']-1 because SCSB's pageSize params seems to be 0-indexed
       if options[:page_number] == parsed_body['totalPageCount']-1 || parsed_body['totalPageCount'] == 0
+        # We're done iterating. Add requested, but unfound barcodes to errors hash
+        result.find_all {|barcode, customer_code| customer_code.nil? }.each do |barcode, customer_code|
+          add_or_append_to_errors(barcode, "Could not found in SCSB's search API")
+        end
+
         return result
       else
         find_all_barcodes(@barcodes, {page_number: options[:page_number] + 1}, result)
