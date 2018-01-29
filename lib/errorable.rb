@@ -11,7 +11,7 @@ module Errorable
     attr_reader :errors
   end
 
-protected
+  private
 
   def add_or_append_to_errors(barcode, message)
     if @errors[barcode]
