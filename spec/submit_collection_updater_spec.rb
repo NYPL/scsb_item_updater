@@ -2,6 +2,41 @@ require 'spec_helper'
 require 'nokogiri'
 
 describe SubmitCollectionUpdater do
+
+  describe 'errors' do
+
+    before do
+      @submit_collection_updater = SubmitCollectionUpdater.new({
+        barcode_to_scsb_xml_mapping: {'1234' => File.read(File.join(__dir__, 'resources', 'example_scsbxml.xml'))}
+      })
+    end
+
+    it "returns an empty hash before barcode_to_customer_code_mapping is called" do
+      expect(@submit_collection_updater.errors).to eq({})
+    end
+
+    it "contains an error if there's an error with the connection to /sharedCollection/submitCollection" do
+      expect(HTTParty).to receive(:post).at_least(:once).and_raise("an exception")
+      @submit_collection_updater.update_scsb_items
+      expect(@submit_collection_updater.errors).to eq({'1234' => ["Bad response from SCSB /sharedCollection/submitCollection API"]})
+    end
+
+    it "parrots the 'error' message from SCSB's response if it exists" do
+      fake_error_response = double(body: JSON.generate([{itemBarcode: "1234", message: "Invalid SCSB xml format"}]))
+      expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_error_response)
+      @submit_collection_updater.update_scsb_items
+      expect(@submit_collection_updater.errors).to eq({'1234' => ["Invalid SCSB xml format"]})
+    end
+
+    it "Won't parrot sucsess messages from SCSB's response" do
+      fake_error_response = double(body: JSON.generate([{itemBarcode: "1234", message: "SuccessRecord"}]))
+      expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_error_response)
+      @submit_collection_updater.update_scsb_items
+      expect(@submit_collection_updater.errors).to eq({})
+    end
+
+  end
+
   describe "update_scsb_items" do
 
     it "calls the submitCollection with the correct parameters" do

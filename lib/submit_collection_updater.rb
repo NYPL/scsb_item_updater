@@ -1,8 +1,10 @@
 require 'httparty'
 require 'json'
 require 'nokogiri'
-
+require 'errorable'
 class SubmitCollectionUpdater
+
+  include Errorable
 
   # options is a hash used to instantiate a SubmitCollectionUpdater
   #  options api_key [String]
@@ -11,6 +13,7 @@ class SubmitCollectionUpdater
   #  options barcode_to_scsb_xml_mapping [Hash]
   #    This is the output of SCSBXMLFetchertranslate_to_scsb_xml
   def initialize(options = {})
+    @errors = {}
     @barcode_to_scsb_xml_mapping = options[:barcode_to_scsb_xml_mapping]
     @api_url  = options[:api_url]
     @api_key = options[:api_key]
@@ -18,7 +21,6 @@ class SubmitCollectionUpdater
     @is_dry_run = options[:is_dry_run]
   end
 
-  # TODO: build up some kind of errors collection
   def update_scsb_items
     if (@is_dry_run)
       puts "This is a dry run for development. It will not update any SCSB collection item."
@@ -41,10 +43,21 @@ private
   end
 
   def update_item(barcode, scsb_xml)
-    # Remove <xml version=... tag
-    stripped_doc = Nokogiri::XML(scsb_xml).root.to_s
-    response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: @is_gcd_protected})
-    puts "sent barcode #{barcode} to submitCollection. The response was #{response.body}"
+    begin
+      # Remove <xml version=... tag
+      stripped_doc = Nokogiri::XML(scsb_xml).root.to_s
+      response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: @is_gcd_protected})
+      parsed_body = JSON.parse(response.body)
+
+      if parsed_body[0] && parsed_body[0]['message'] && parsed_body[0]['message'] != 'SuccessRecord'
+        add_or_append_to_errors(barcode, parsed_body[0]['message'])
+      end
+
+      puts "sent barcode #{barcode} to submitCollection. The response was #{response.body}"
+    rescue Exception => e
+      # TODO: log...
+      add_or_append_to_errors(barcode, 'Bad response from SCSB /sharedCollection/submitCollection API')
+    end
   end
 
 end
