@@ -1,8 +1,11 @@
 require 'oauth2'
 require 'httparty'
 require 'nypl_log_formatter'
+# require 'errorable'
 
 class SCSBXMLFetcher
+  # include Errorable
+
   # options is a hash used to instantiate a SCSBXMLFetcher
   #  options token [String]
   #  options oauth_url [String]
@@ -27,6 +30,7 @@ class SCSBXMLFetcher
     results = {}
     @barcode_to_customer_code_mapping.each do |barcode, customer_code|
       if customer_code
+        # begin
         results[barcode] = HTTParty.get(
           "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
           query: {
@@ -36,6 +40,12 @@ class SCSBXMLFetcher
           },
           headers: { 'Authorization' => "Bearer #{@oauth_token}" }
         ).body
+        # rescue Exception => e
+          # barcodes.each do |barcode|
+          #   add_or_append_to_errors(barcode, "Bad response from SCSB API")
+          # end
+          
+        # end
       else
         @logger.error("Not valid customer code for the barcode: #{barcode}.")
       end
@@ -44,7 +54,7 @@ class SCSBXMLFetcher
     results
   end
 
-private
+  private
 
   # TODO: We should cache tokens and retry once they expire
   def set_token
