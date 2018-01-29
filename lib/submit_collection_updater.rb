@@ -2,6 +2,7 @@ require 'httparty'
 require 'json'
 require 'nokogiri'
 require 'errorable'
+
 class SubmitCollectionUpdater
 
   include Errorable
