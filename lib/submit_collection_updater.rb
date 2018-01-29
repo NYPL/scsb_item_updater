@@ -1,7 +1,7 @@
 require 'httparty'
 require 'json'
 require 'nokogiri'
-require 'errorable'
+require File.join('.', 'lib', 'errorable')
 
 class SubmitCollectionUpdater
 
