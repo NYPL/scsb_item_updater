@@ -1,10 +1,10 @@
 require 'oauth2'
 require 'httparty'
 require 'nypl_log_formatter'
-# require 'errorable'
+require './lib/errorable'
 
 class SCSBXMLFetcher
-  # include Errorable
+  include Errorable
 
   # options is a hash used to instantiate a SCSBXMLFetcher
   #  options token [String]
@@ -30,24 +30,22 @@ class SCSBXMLFetcher
     results = {}
     @barcode_to_customer_code_mapping.each do |barcode, customer_code|
       if customer_code
-        # begin
-        results[barcode] = HTTParty.get(
-          "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
-          query: {
-            customerCode: customer_code,
-            barcode: barcode,
-            includeFullBibTree: 'false'
-          },
-          headers: { 'Authorization' => "Bearer #{@oauth_token}" }
-        ).body
-        # rescue Exception => e
-          # barcodes.each do |barcode|
-          #   add_or_append_to_errors(barcode, "Bad response from SCSB API")
-          # end
-          
-        # end
+        begin
+          results[barcode] = HTTParty.get(
+            "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
+            query: {
+              customerCode: customer_code,
+              barcode: barcode,
+              includeFullBibTree: 'false'
+            },
+            headers: { 'Authorization' => "Bearer #{@oauth_token}" }
+          ).body
+        rescue Exception => e
+          add_or_append_to_errors(barcode, "Bad response from NYPL Bibs API")
+        end
       else
         @logger.error("Not valid customer code for the barcode: #{barcode}.")
+        add_or_append_to_errors(barcode, "No valid customer code")
       end
     end
 
