@@ -1,6 +1,6 @@
 require 'httparty'
 require 'json'
-require 'errorable'
+require File.join('.', 'lib', 'errorable')
 
 class BarcodeToCustomerCodeMapper
   include Errorable
