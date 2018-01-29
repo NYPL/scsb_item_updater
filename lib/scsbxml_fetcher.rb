@@ -16,6 +16,7 @@ class SCSBXMLFetcher
   #    This is the output of BarcodeToCustomerCodeMapper#barcode_to_customer_code_mapping
   def initialize(options = {})
     @token = nil
+    @errors = {}
     @oauth_url = options[:oauth_url]
     @oauth_key = options[:oauth_key]
     @oauth_secret = options[:oauth_secret]
@@ -45,7 +46,7 @@ class SCSBXMLFetcher
         end
       else
         @logger.error("Not valid customer code for the barcode: #{barcode}.")
-        add_or_append_to_errors(barcode, "No valid customer code")
+        add_or_append_to_errors(barcode, "Not have valid customer code")
       end
     end
 
