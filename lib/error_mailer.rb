@@ -1,9 +1,10 @@
 require 'mail'
+require 'erb'
 
 class ErrorMailer
-  attr_reader :from_address, :mailer_domain, :mailer_username, :mailer_password,
-    :sqs_message
-  # TODO: Take SMTP configuration as args
+  attr_reader :from_address, :mailer_domain, :mailer_username,
+    :mailer_password, :sqs_message
+
   #  options :from_address    [String]
   #  options :mailer_domain   [String]
   #  options :mailer_username [String]
