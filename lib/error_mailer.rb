@@ -47,7 +47,14 @@ class ErrorMailer
     result
   end
 
+  def email_body
+    template = File.read(File.join(__dir__, '..', 'templates', 'error_email.erb'))
+    renderer = ERB.new(template)
+    renderer.result(binding)
+  end
+
   private
+
 
   def get_mailer(error_mailer)
     if @environment == 'production'
@@ -55,7 +62,7 @@ class ErrorMailer
         from error_mailer.from_address
         to error_mailer.sqs_message['email']
         subject "ReCAP: Errors with a recent action"
-        body    error_mailer.all_errors
+        body    error_mailer.email_body
         delivery_method :smtp, {
           address: error_mailer.mailer_domain,
           port: 587,
@@ -71,7 +78,7 @@ class ErrorMailer
         from error_mailer.from_address
         to error_mailer.sqs_message['email']
         subject "ReCAP: Errors with a recent action"
-        body    error_mailer.all_errors
+        body    error_mailer.email_body
         delivery_method :logger
      end
     end
