@@ -44,7 +44,7 @@ class MessageHandler
         submit_collection_updater.update_scsb_items
 
         mailer = ErrorMailer.new(
-          error_hashes: [mapper.errors],
+          error_hashes: [mapper.errors, submit_collection_updater.errors],
           sqs_message: @parsed_message,
           from_address:  @settings['email_from_address'],
           mailer_domain: @settings['smtp_domain'],
