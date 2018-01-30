@@ -21,7 +21,8 @@ class SCSBXMLFetcher
     @oauth_key = options[:oauth_key]
     @oauth_secret = options[:oauth_secret]
     @platform_api_url = options[:platform_api_url]
-    @barcode_to_customer_code_mapping = options[:barcode_to_customer_code_mapping]
+    @barcode_to_customer_code_mapping =
+      options[:barcode_to_customer_code_mapping]
     @logger = NyplLogFormatter.new(STDOUT)
   end
 
@@ -42,14 +43,13 @@ class SCSBXMLFetcher
             headers: { 'Authorization' => "Bearer #{@oauth_token}" }
           ).body
         rescue Exception => e
-          add_or_append_to_errors(barcode, "Bad response from NYPL Bibs API")
+          add_or_append_to_errors(barcode, 'Bad response from NYPL Bibs API')
         end
       else
         @logger.error("Not valid customer code for the barcode: #{barcode}.")
-        add_or_append_to_errors(barcode, "Not have valid customer code")
+        add_or_append_to_errors(barcode, 'Not have valid customer code')
       end
     end
-
     results
   end
 
