@@ -15,37 +15,19 @@ class ErrorMailer
     default_options = {error_hashes: [], sqs_message: {}}
     options = default_options.merge(options)
     @from_address     = options[:from_address]
-    @mailer_domain      = options[:mailer_domain]
+    @mailer_domain    = options[:mailer_domain]
     @mailer_username  = options[:mailer_username]
     @mailer_password  = options[:mailer_password]
     @sqs_message      = options[:sqs_message]
     @error_hashes     = options[:error_hashes]
+    @environment      = options[:environment]
   end
 
-  # TODO: conditionally log, not send.
   def send_error_email
     if !all_errors.empty?
-      error_mailer = self
-
-      mail = Mail.new do
-        from error_mailer.from_address
-        # to   @sqs_message['email']
-        to 'stephenschor@nypl.org'
-        subject "ReCAP: Errors with a recent action"
-        body    error_mailer.all_errors
-        delivery_method :smtp, {
-          address: error_mailer.mailer_domain,
-          port: 587,
-          user_name: error_mailer.mailer_username,
-          password: error_mailer.mailer_password,
-          domain: "nypl.org",
-          authentication: :login,
-          enable_starttls_auto: true
-        }
-     end
-
-     mail.deliver!
+      get_mailer(self).deliver!
     else
+      # TODO: log, don't put
       puts 'everything went fine...no errors'
     end
   end
@@ -62,6 +44,36 @@ class ErrorMailer
       end
     end
     result
+  end
+
+  private
+
+  def get_mailer(error_mailer)
+    if @environment == 'production'
+      Mail.new do
+        from error_mailer.from_address
+        to error_mailer.sqs_message['email']
+        subject "ReCAP: Errors with a recent action"
+        body    error_mailer.all_errors
+        delivery_method :smtp, {
+          address: error_mailer.mailer_domain,
+          port: 587,
+          user_name: error_mailer.mailer_username,
+          password: error_mailer.mailer_password,
+          domain: "nypl.org",
+          authentication: :login,
+          enable_starttls_auto: true
+        }
+     end
+    else
+      Mail.new do
+        from error_mailer.from_address
+        to error_mailer.sqs_message['email']
+        subject "ReCAP: Errors with a recent action"
+        body    error_mailer.all_errors
+        delivery_method :logger
+     end
+    end
   end
 
 end
