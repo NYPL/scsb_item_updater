@@ -50,6 +50,7 @@ class MessageHandler
           mailer_domain: @settings['smtp_domain'],
           mailer_username: @settings['smtp_user_name'],
           mailer_password: @settings['smtp_password'],
+          environment: @settings['environment']
         )
         mailer.send_error_email
       else
