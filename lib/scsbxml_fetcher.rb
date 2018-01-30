@@ -1,7 +1,7 @@
 require 'oauth2'
 require 'httparty'
 require 'nypl_log_formatter'
-require './lib/errorable'
+require File.join('.', 'lib', 'errorable')
 
 class SCSBXMLFetcher
   include Errorable
@@ -21,8 +21,7 @@ class SCSBXMLFetcher
     @oauth_key = options[:oauth_key]
     @oauth_secret = options[:oauth_secret]
     @platform_api_url = options[:platform_api_url]
-    @barcode_to_customer_code_mapping =
-      options[:barcode_to_customer_code_mapping]
+    @barcode_to_customer_code_mapping = options[:barcode_to_customer_code_mapping]
     @logger = NyplLogFormatter.new(STDOUT)
   end
 
