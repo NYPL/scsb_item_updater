@@ -42,6 +42,19 @@ class MessageHandler
         )
 
         submit_collection_updater.update_scsb_items
+
+        mailer = ErrorMailer.new(
+          error_hashes: [mapper.errors,
+            xml_fetcher.errors,
+            submit_collection_updater.errors],
+          sqs_message: @parsed_message,
+          from_address:  @settings['email_from_address'],
+          mailer_domain: @settings['smtp_domain'],
+          mailer_username: @settings['smtp_user_name'],
+          mailer_password: @settings['smtp_password'],
+          environment: @settings['environment']
+        )
+        mailer.send_error_email
       else
         @logger.error("Message '#{@message.body}' contains an unsupported action")
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
