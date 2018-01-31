@@ -34,16 +34,14 @@ class ErrorMailer
   end
 
   def all_errors
-    result = {}
+    result = Hash.new {|hash, key| hash[key] = []}
+
     @error_hashes.each do |error_hash|
       error_hash.each do |barcode, messages|
-        if result[barcode]
-          messages.each {|message| result[barcode] << message }
-        else
-          result[barcode] = messages
-        end
+        result[barcode] += messages
       end
     end
+
     result
   end
 
