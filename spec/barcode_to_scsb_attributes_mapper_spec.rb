@@ -32,10 +32,16 @@ describe BarcodeToScsbAttributesMapper do
   end
 
   describe "barcode_to_attributes_mapping" do
-
+    before do
+      # customerCode
+      # bibId
+      # owningInstitutionHoldingsId
+      # owningInstitutionItemId
+      @response_body = JSON.generate({ searchResultRows: [{ barcode: '1234', customerCode: 'NA' }], totalPageCount: 1 })
+    end
     it "can map an array of barcodes to a hash of barcodes => {scsb_attributes}" do
       fake_scsb_response = double()
-      allow(fake_scsb_response).to receive(:body) { JSON.generate({searchResultRows: [{barcode: '1234', customerCode: 'NA'}], totalPageCount: 1}) }
+      allow(fake_scsb_response).to receive(:body) { @response_body }
       expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
 
       barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['1234', '5678'])
@@ -46,7 +52,7 @@ describe BarcodeToScsbAttributesMapper do
 
     it "returns nil as a value if the barcode isn't in SCSB" do
       fake_scsb_response = double()
-      allow(fake_scsb_response).to receive(:body) { JSON.generate({searchResultRows: [{barcode: '1234', customerCode: 'NA'}], totalPageCount: 1}) }
+      allow(fake_scsb_response).to receive(:body) { @response_body }
       expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
 
       barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['this-wont-be-there'])
