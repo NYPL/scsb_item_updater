@@ -11,7 +11,7 @@ describe SubmitCollectionUpdater do
       })
     end
 
-    it "returns an empty hash before barcode_to_customer_code_mapping is called" do
+    it "returns an empty hash before update_scsb_itemsis called" do
       expect(@submit_collection_updater.errors).to eq({})
     end
 

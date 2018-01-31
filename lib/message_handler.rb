@@ -41,15 +41,15 @@ class MessageHandler
   end
 
   def sync
-    mapper = BarcodeToCustomerCodeMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
-    mapping = mapper.barcode_to_customer_code_mapping
+    mapper = BarcodeToScsbAttributesMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
+    mapping = mapper.barcode_to_attributes_mapping
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
     xml_fetcher = SCSBXMLFetcher.new({
       oauth_key:    @settings['nypl_oauth_key'],
       oauth_url:    @settings['nypl_oauth_url'],
       oauth_secret: @settings['nypl_oauth_secret'],
       platform_api_url: @settings['platform_api_url'],
-      barcode_to_customer_code_mapping: mapping
+      barcode_to_attributes_mapping: mapping
     })
     barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
     @logger.info "the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"

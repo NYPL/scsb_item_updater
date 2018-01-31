@@ -12,8 +12,8 @@ class SCSBXMLFetcher
   #  options oauth_key [String]
   #  options oauth_secret [String]
   #  options platform_api_url [String]
-  #  options barcode_to_customer_code_mapping [Hash]
-  #    This is the output of BarcodeToCustomerCodeMapper#barcode_to_customer_code_mapping
+  #  options barcode_to_attributes_mapping [Hash]
+  #    This is the output of BarcodeToScsbAttributesMapper#barcode_to_attributes_mapping
   def initialize(options = {})
     @token = nil
     @errors = {}
@@ -21,7 +21,7 @@ class SCSBXMLFetcher
     @oauth_key = options[:oauth_key]
     @oauth_secret = options[:oauth_secret]
     @platform_api_url = options[:platform_api_url]
-    @barcode_to_customer_code_mapping = options[:barcode_to_customer_code_mapping]
+    @barcode_to_attributes_mapping = options[:barcode_to_attributes_mapping]
     @logger = NyplLogFormatter.new(STDOUT)
   end
 
@@ -29,7 +29,7 @@ class SCSBXMLFetcher
   def translate_to_scsb_xml
     set_token
     results = {}
-    @barcode_to_customer_code_mapping.each do |barcode, customer_code|
+    @barcode_to_attributes_mapping.each do |barcode, customer_code|
       if customer_code
         begin
           results[barcode] = HTTParty.get(

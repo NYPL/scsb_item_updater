@@ -2,7 +2,7 @@ require 'httparty'
 require 'json'
 require File.join('.', 'lib', 'errorable')
 
-class BarcodeToCustomerCodeMapper
+class BarcodeToScsbAttributesMapper
   include Errorable
 
   def initialize(options)
@@ -12,7 +12,7 @@ class BarcodeToCustomerCodeMapper
     @api_key  = options[:api_key]
   end
 
-  def barcode_to_customer_code_mapping
+  def barcode_to_attributes_mapping
     initial_results = {}
     @barcodes.each {|barcode| initial_results[barcode.to_s] = nil }
     @results = find_all_barcodes(@barcodes, {page_number: 0}, initial_results)
