@@ -29,13 +29,13 @@ class SCSBXMLFetcher
   def translate_to_scsb_xml
     set_token
     results = {}
-    @barcode_to_attributes_mapping.each do |barcode, customer_code|
-      if customer_code
+    @barcode_to_attributes_mapping.each do |barcode, scsb_attributes|
+      if scsb_attributes['customerCode']
         begin
           results[barcode] = HTTParty.get(
             "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
             query: {
-              customerCode: customer_code,
+              customerCode: scsb_attributes['customerCode'],
               barcode: barcode,
               includeFullBibTree: 'false'
             },

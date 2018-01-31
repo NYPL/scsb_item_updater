@@ -33,13 +33,15 @@ describe BarcodeToScsbAttributesMapper do
 
   describe "barcode_to_attributes_mapping" do
 
-    it "can map an array of barcodes to a hash of barcodes => customer_code" do
+    it "can map an array of barcodes to a hash of barcodes => {scsb_attributes}" do
       fake_scsb_response = double()
       allow(fake_scsb_response).to receive(:body) { JSON.generate({searchResultRows: [{barcode: '1234', customerCode: 'NA'}], totalPageCount: 1}) }
       expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
 
       barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['1234', '5678'])
-      expect(barcode_mapper.barcode_to_attributes_mapping).to eq({'1234' => "NA", "5678" => nil})
+      expect(barcode_mapper.barcode_to_attributes_mapping).to eq(
+        {'1234' => {'customerCode' => "NA"}, "5678" => {'customerCode' => nil}}
+      )
     end
 
     it "returns nil as a value if the barcode isn't in SCSB" do
@@ -48,7 +50,7 @@ describe BarcodeToScsbAttributesMapper do
       expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
 
       barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['this-wont-be-there'])
-      expect(barcode_mapper.barcode_to_attributes_mapping).to eq({'this-wont-be-there' => nil})
+      expect(barcode_mapper.barcode_to_attributes_mapping).to eq({'this-wont-be-there' => {'customerCode' => nil}})
     end
   end
 end

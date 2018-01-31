@@ -3,7 +3,7 @@ require 'spec_helper'
 describe SCSBXMLFetcher do
   describe 'errors' do
     before do
-      @fetcher = SCSBXMLFetcher.new(barcode_to_attributes_mapping: { '1234' => 'NA', '5678' => nil })
+      @fetcher = SCSBXMLFetcher.new(barcode_to_attributes_mapping: { '1234' => {'customerCode' => 'NA'}, '5678' => {'customerCode' => nil} })
       # Mock OAuth
       @fake_oauth_client = instance_double('OAuth2::Client', 'client_credentials' => double('get_token' => double('token' => 'hi')))
     end
@@ -42,7 +42,7 @@ describe SCSBXMLFetcher do
       @fake_nypl_bibs_response = double
       allow(@fake_nypl_bibs_response).to receive(:body).at_least(:once) { '<?xml version=\"1.0\" ?><bibRecords></bibRecords>' }
 
-      @fetcher = SCSBXMLFetcher.new(barcode_to_attributes_mapping: { '1234' => 'NA', '5678' => nil })
+      @fetcher = SCSBXMLFetcher.new(barcode_to_attributes_mapping: { '1234' => {'customerCode' => 'NA'}, '5678' => {'customerCode' => nil} })
     end
 
     it 'maps a hash of barcodes => customer_code to a hash of barcodes and the values are SCSBXML Strings' do
