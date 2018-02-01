@@ -2,7 +2,7 @@ Dir[File.join(__dir__, '*.rb')].each {|file| require file }
 require 'nypl_log_formatter'
 
 class MessageHandler
-  VALID_ACTIONS = ['sync', 'transfer']
+  VALID_ACTIONS = ['update', 'transfer']
 
   #  options message    [Aws::SQS::Types::Message]
   #  options sqs_client [Class: Aws::SQS::Client]
@@ -46,7 +46,7 @@ class MessageHandler
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
   end
 
-  def sync
+  def update
     mapper = BarcodeToScsbAttributesMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
     mapping = mapper.barcode_to_attributes_mapping
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"

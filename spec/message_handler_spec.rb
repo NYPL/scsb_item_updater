@@ -7,7 +7,7 @@ describe MessageHandler do
   describe "allowable actions" do
 
     it "has a whitelist of allowable actions" do
-      expect(MessageHandler::VALID_ACTIONS).to eq(['sync', 'transfer'])
+      expect(MessageHandler::VALID_ACTIONS).to eq(['update', 'transfer'])
     end
 
   end
