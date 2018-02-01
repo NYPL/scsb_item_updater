@@ -12,9 +12,10 @@ class BarcodeToScsbAttributesMapper
     @api_key  = options[:api_key]
   end
 
+  # owningInstitutionItemId
   def barcode_to_attributes_mapping
     initial_results = {}
-    @barcodes.each {|barcode| initial_results[barcode.to_s] = {'customerCode' => nil} }
+    @barcodes.each {|barcode| initial_results[barcode.to_s] = {'customerCode' => nil, 'bibId' => nil, 'owningInstitutionHoldingsId' => nil, 'owningInstitutionItemId' => nil, 'barcode' => nil} }
     @results = find_all_barcodes(@barcodes, {page_number: 0}, initial_results)
   end
 
@@ -28,7 +29,8 @@ private
       parsed_body['searchResultRows'].each do |result_row|
         # guard against the off-chance SCSB returns barcode that wasn't requested
         if @barcodes.include? result_row['barcode']
-          result[result_row['barcode']] = {'customerCode' => result_row['customerCode']}
+          # result[result_row['barcode']] = {'customerCode' => result_row['customerCode']}
+          result[result_row['barcode']] = result_row
         end
       end
 
