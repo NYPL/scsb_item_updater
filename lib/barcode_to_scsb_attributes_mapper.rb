@@ -47,9 +47,8 @@ private
       end
 
     rescue Exception => e
-      barcodes.each do |barcode|
-        add_or_append_to_errors(barcode, "Bad response from SCSB API")
-      end
+      barcodes.each { |barcode| add_or_append_to_errors(barcode, "Bad response from SCSB API") }
+      {}
     end
   end
 
