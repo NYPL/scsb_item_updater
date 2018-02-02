@@ -7,7 +7,7 @@ describe ItemTransferer do
         'holdingTransfers' =>
         [
           {'source'       => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'},
-           'destination' =>  {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+           'destination' =>  {'owningInstitutionBibId' => 'destinationBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
         ],
         "institution" => "NYPL"
       }
@@ -26,7 +26,8 @@ describe ItemTransferer do
         item_transferer = ItemTransferer.new(
           api_key: 'fake_key',
           api_url: "http://example.com",
-          barcode_to_scsb_xml_mapping: {'1234' => {'bibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+          barcode_to_attributes_mapping: {'1234' => {'bibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}},
+          destination_bib_id: "destinationBibId"
         )
 
         item_transferer.transfer!
