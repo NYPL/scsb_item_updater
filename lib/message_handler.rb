@@ -41,13 +41,13 @@ class MessageHandler
   end
 
   def transfer
-    source_barcode_scsb_mapper = BarcodeToScsbAttributesMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
+    source_barcode_scsb_mapper = get_barcode_mapper
     source_barcode_attributes = source_barcode_scsb_mapper.barcode_to_attributes_mapping
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
   end
 
   def update
-    mapper = BarcodeToScsbAttributesMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
+    mapper = get_barcode_mapper
     mapping = mapper.barcode_to_attributes_mapping
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
     xml_fetcher = SCSBXMLFetcher.new({
@@ -73,6 +73,14 @@ class MessageHandler
   end
 
   private
+
+  def get_barcode_mapper
+    BarcodeToScsbAttributesMapper.new({
+      barcodes: @parsed_message['barcodes'],
+      api_url: @settings['scsb_api_url'],
+      api_key: @settings['scsb_api_key']
+    })
+  end
 
   def send_errors_for(errors = [])
     mailer = ErrorMailer.new(
