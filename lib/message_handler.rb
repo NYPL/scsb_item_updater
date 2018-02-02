@@ -42,8 +42,22 @@ class MessageHandler
 
   def transfer
     source_barcode_scsb_mapper = get_barcode_mapper
-    source_barcode_attributes = source_barcode_scsb_mapper.barcode_to_attributes_mapping
-    @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
+    source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping
+    @logger.info "MAPPING of barcodes to customerCodes: #{source_barcode_to_attributes_map}"
+    item_transferer = ItemTransferer.new({
+      api_url: @settings['scsb_api_url'],
+      api_key: @settings['scsb_api_key'],
+      barcode_to_attributes_mapping: source_barcode_to_attributes_map,
+      destination_bib_id: @parsed_message['bibRecordNumber']
+    })
+
+    # TODO: possibly wrap this all in a is_dry_run
+    item_transferer.transfer!
+
+    # TODO: don't initialize SCSBXMLFetcher with 'errored' barcodes
+    # 1.  Instantiate SCSBXMLFetcher
+    # 2.  Instantiate SubmitCollectionUpdater
+    # 3.  Instantiate ErrorMailer
   end
 
   def update
