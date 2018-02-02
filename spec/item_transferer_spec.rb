@@ -2,7 +2,35 @@ require 'spec_helper'
 
 describe ItemTransferer do
   describe 'making calls' do
-    it 'hits SCSB with the appropriate headers & body'
+    it 'hits SCSB with the appropriate headers & body' do
+      request_body = {
+        'holdingTransfers' =>
+        [
+          {'source'       => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'},
+           'destination' =>  {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+        ],
+        "institution" => "NYPL"
+      }
+
+      expect(HTTParty).to receive(:post).with(
+        "http://example.com/sharedCollection/transferHoldingsAndItems",
+        headers: {
+              Accept: 'application/json',
+              api_key: 'fake_key',
+              'Content-Type': 'application/json'
+        },
+        body: JSON.generate(request_body)
+        ).
+        at_least(:once).and_return('The Owls are not what they seem')
+
+        item_transferer = ItemTransferer.new(
+          api_key: 'fake_key',
+          api_url: "http://example.com",
+          barcode_to_scsb_xml_mapping: {'1234' => {'bibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+        )
+
+        item_transferer.transfer!
+    end
   end
 
   describe 'errors' do
