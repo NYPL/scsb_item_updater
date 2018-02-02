@@ -50,7 +50,7 @@ describe SubmitCollectionUpdater do
         "http://example.com/sharedCollection/submitCollection",
         headers: request_headers,
         body: Nokogiri::XML(xml).root.to_s,
-        query: {institution: 'nypl', isCGDProtected: false}).and_return(fake_http_response)
+        query: {institution: 'NYPL', isCGDProtected: false}).and_return(fake_http_response)
 
       updater = SubmitCollectionUpdater.new(
         barcode_to_scsb_xml_mapping: {"123" => xml},

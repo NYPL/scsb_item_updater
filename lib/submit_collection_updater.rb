@@ -47,7 +47,7 @@ private
     begin
       # Remove <xml version=... tag
       stripped_doc = Nokogiri::XML(scsb_xml).root.to_s
-      response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: @is_gcd_protected})
+      response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'NYPL', isCGDProtected: @is_gcd_protected})
       parsed_body = JSON.parse(response.body)
 
       if parsed_body[0] && parsed_body[0]['message'] && parsed_body[0]['message'] != 'SuccessRecord'
