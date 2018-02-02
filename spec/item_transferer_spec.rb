@@ -40,5 +40,11 @@ describe ItemTransferer do
     end
 
     it "parrots the 'error' message from SCSB's response if it exists"
+    it "adds an error message if there's problems connecting to SCSB's API" do
+      expect(HTTParty).to receive(:post).and_raise(Exception)
+      item_transferer = ItemTransferer.new(barcode_to_attributes_mapping: {"1234" => {}})
+      item_transferer.transfer!
+      expect(item_transferer.errors).to eq({"1234" => ["error connecting to transferHoldingsAndItems"]})
+    end
   end
 end

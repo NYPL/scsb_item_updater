@@ -23,7 +23,8 @@ class ItemTransferer
           body:    request_body(item_attributes)
         )
       rescue Exception => e
-        # TODO: Log & Add to errors
+        # TODO: log...
+        add_or_append_to_errors(barcode, "error connecting to transferHoldingsAndItems")
       end
     end
   end
