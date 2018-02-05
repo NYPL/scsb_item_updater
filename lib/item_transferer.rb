@@ -24,7 +24,7 @@ class ItemTransferer
         )
 
         parsed_body = JSON.parse(response.body)
-        if parsed_body["Message"] != "Success"
+        if parsed_body["message"] != "Success"
           add_or_append_to_errors(barcode, parsed_body['holdingTransferResponses'][0]['message'])
         end
       rescue Exception => e
