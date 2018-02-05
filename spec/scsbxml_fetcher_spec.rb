@@ -31,6 +31,18 @@ describe SCSBXMLFetcher do
       error_message = 'Not have valid customer code'
       expect(@fetcher.errors['5678']).to include(error_message)
     end
+
+    it 'contains an error if the response does not returns a valid XML' do
+      expect(OAuth2::Client).to receive(:new).at_least(:once).and_return(@fake_oauth_client)
+      # Mock actual call to nypl-bibs
+      @fake_nypl_bibs_response = double
+      allow(@fake_nypl_bibs_response).to receive(:body).at_least(:once) { '' }
+      expect(HTTParty).to receive(:get).at_least(:once).and_return(@fake_nypl_bibs_response)
+
+      @fetcher.translate_to_scsb_xml
+      error_message = 'Not have valid SCSB XML'
+      expect(@fetcher.errors['1234']).to include(error_message)
+    end
   end
 
   describe 'translate_to_scsb_xml' do

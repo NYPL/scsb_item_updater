@@ -32,7 +32,7 @@ class SCSBXMLFetcher
     @barcode_to_attributes_mapping.each do |barcode, scsb_attributes|
       if scsb_attributes['customerCode']
         begin
-          results[barcode] = HTTParty.get(
+          response_body = HTTParty.get(
             "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
             query: {
               customerCode: scsb_attributes['customerCode'],
@@ -41,6 +41,14 @@ class SCSBXMLFetcher
             },
             headers: { 'Authorization' => "Bearer #{@oauth_token}" }
           ).body
+
+          # checks the response_body to see if it contains valid XML
+          if response_body.empty?
+            @logger.error("Not valid SCSB XML from NYPL-Bibs for the barcode: #{barcode}.")
+            add_or_append_to_errors(barcode, 'Not have valid SCSB XML')
+          else
+            results[barcode] = response_body
+          end
         rescue Exception => e
           add_or_append_to_errors(barcode, 'Bad response from NYPL Bibs API')
         end

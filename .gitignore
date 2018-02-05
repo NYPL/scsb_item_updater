@@ -1,3 +1,4 @@
 config/.env
+.DS_Store
 .rubocop.yml
 .rubocop_todo.yml
