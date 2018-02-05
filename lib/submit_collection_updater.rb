@@ -28,7 +28,11 @@ class SubmitCollectionUpdater
     else
       puts "Updating the following #{@barcode_to_scsb_xml_mapping.keys.length} barcodes: #{@barcode_to_scsb_xml_mapping.keys.join(',')}"
       @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
-        update_item(barcode, scsb_xml)
+        if scsb_xml.empty?
+          add_or_append_to_errors(barcode, 'Not have valid SCSB XML. Stops submitting this record')
+        else
+          update_item(barcode, scsb_xml)
+        end
       end
     end
   end
