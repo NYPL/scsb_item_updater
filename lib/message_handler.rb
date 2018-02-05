@@ -54,39 +54,64 @@ class MessageHandler
     # TODO: possibly wrap this all in a is_dry_run
     item_transferer.transfer!
 
-    # TODO: don't initialize SCSBXMLFetcher with 'errored' barcodes
-    # 1.  Instantiate SCSBXMLFetcher
-    # 2.  Instantiate SubmitCollectionUpdater
-    # 3.  Instantiate ErrorMailer
+    # don't send barcodes to SCSBXMLFetcher that errored in transfer
+    item_transferer.errors.keys.each { |barcode| mapping.delete(barcode) }
+
+    xml_fetcher = get_scsb_fetcher(mapping)
+    barcode_to_scsb_xml_mapping = xml.xml_fetcher.translate_to_scsb_xml
+
+    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+    submit_collection_updater.update_scsb_items
+
+    send_errors_for([
+      source_barcode_scsb_mapper.errors,
+      item_transferer.errors,
+      xml_fetcher.errors,
+      submit_collection_updater.errors
+    ])
   end
 
   def update
     mapper = get_barcode_mapper
     mapping = mapper.barcode_to_attributes_mapping
     @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
-    xml_fetcher = SCSBXMLFetcher.new({
-      oauth_key:    @settings['nypl_oauth_key'],
-      oauth_url:    @settings['nypl_oauth_url'],
-      oauth_secret: @settings['nypl_oauth_secret'],
-      platform_api_url: @settings['platform_api_url'],
-      barcode_to_attributes_mapping: mapping
-    })
+    xml_fetcher = get_scsb_fetcher(mapping)
+
     barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
     @logger.info "the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
 
-    submit_collection_updater = SubmitCollectionUpdater.new(
+    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+
+    submit_collection_updater.update_scsb_items
+    send_errors_for([
+      mapper.errors,
+      xml_fetcher.errors,
+      submit_collection_updater.errors
+    ])
+
+  end
+
+  private
+
+  def get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+    SubmitCollectionUpdater.new(
         barcode_to_scsb_xml_mapping: barcode_to_scsb_xml_mapping,
         api_url: @settings['scsb_api_url'],
         api_key: @settings['scsb_api_key'],
         is_gcd_protected: @parsed_message['protectCGD'],
         is_dry_run: @settings['is_dry_run'],
     )
-
-    submit_collection_updater.update_scsb_items
-    send_errors_for([mapper.errors, xml_fetcher.errors,submit_collection_updater.errors])
   end
 
-  private
+  def get_scsb_fetcher(barcode_to_attribute_mapping = {})
+    SCSBXMLFetcher.new({
+      oauth_key:    @settings['nypl_oauth_key'],
+      oauth_url:    @settings['nypl_oauth_url'],
+      oauth_secret: @settings['nypl_oauth_secret'],
+      platform_api_url: @settings['platform_api_url'],
+      barcode_to_attributes_mapping: barcode_to_attribute_mapping
+    })
+  end
 
   def get_barcode_mapper
     BarcodeToScsbAttributesMapper.new({
