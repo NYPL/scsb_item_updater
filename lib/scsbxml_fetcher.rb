@@ -42,9 +42,9 @@ class SCSBXMLFetcher
             headers: { 'Authorization' => "Bearer #{@oauth_token}" }
           ).body
 
-          # checks the response_body to see if it contains valid XML
+          # checks response_body to see if it contains valid XML
           if response_body.empty?
-            @logger.error("Not valid SCSB XML from NYPL-Bibs for the barcode: #{barcode}.")
+            @logger.error("No valid SCSB XML from NYPL-Bibs for the barcode: #{barcode}.")
             add_or_append_to_errors(barcode, 'Not have valid SCSB XML')
           else
             results[barcode] = response_body
@@ -53,7 +53,7 @@ class SCSBXMLFetcher
           add_or_append_to_errors(barcode, 'Bad response from NYPL Bibs API')
         end
       else
-        @logger.error("Not valid customer code for the barcode: #{barcode}.")
+        @logger.error("No valid customer code for the barcode: #{barcode}.")
         add_or_append_to_errors(barcode, 'Not have valid customer code')
       end
     end
