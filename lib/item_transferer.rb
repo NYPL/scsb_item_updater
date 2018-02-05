@@ -50,7 +50,7 @@ class ItemTransferer
      "holdingTransfers": [
        {
          "source": {
-           "owningInstitutionBibId": item_attributes['bibId'],
+           "owningInstitutionBibId": item_attributes['owningInstitutionBibId'],
            "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId']
          },
          "destination": {
