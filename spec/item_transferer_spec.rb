@@ -14,7 +14,7 @@ describe ItemTransferer do
     @item_transferer = ItemTransferer.new(
      api_key: 'fake_key',
      api_url: "http://example.com",
-     barcode_to_attributes_mapping: {'1234' => {'bibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}},
+     barcode_to_attributes_mapping: {'1234' => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}},
      destination_bib_id: "destinationBibId"
    )
 
