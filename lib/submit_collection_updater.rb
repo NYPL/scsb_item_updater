@@ -50,7 +50,7 @@ private
       response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'NYPL', isCGDProtected: @is_gcd_protected})
       parsed_body = JSON.parse(response.body)
 
-      if parsed_body[0] && parsed_body[0]['message'] && parsed_body[0]['message'] != 'SuccessRecord'
+      if parsed_body[0] && parsed_body[0]['message'] && !parsed_body[0]['message'].downcase.include?('success')
         add_or_append_to_errors(barcode, parsed_body[0]['message'])
       end
 
