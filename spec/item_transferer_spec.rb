@@ -6,7 +6,7 @@ describe ItemTransferer do
       'holdingTransfers' =>
       [
         {'source'       => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'},
-         'destination' =>  {'owningInstitutionBibId' => 'destinationBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+         'destination' =>  {'owningInstitutionBibId' => '.destinationBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
       ],
       "institution" => "NYPL"
     }

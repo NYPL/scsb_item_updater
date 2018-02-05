@@ -54,7 +54,7 @@ class ItemTransferer
            "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId']
          },
          "destination": {
-           "owningInstitutionBibId": @destination_bib_id,
+           "owningInstitutionBibId": bib_with_leading_dot,
            "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId']
          }
        }
@@ -63,6 +63,14 @@ class ItemTransferer
    }
 
    JSON.generate(body)
+  end
+
+  def bib_with_leading_dot
+    if @destination_bib_id && @destination_bib_id.start_with?('.')
+      @destination_bib_id
+    else
+      ".#{@destination_bib_id}"
+    end
   end
 
 end
