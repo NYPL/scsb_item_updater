@@ -21,6 +21,7 @@ class MessageHandler
       @parsed_message = JSON.parse(@message.body)
       if valid?
         self.send(@parsed_message['action'])
+        @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
       else
         @logger.error("Message '#{@message.body}' contains an unsupported action")
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
@@ -55,10 +56,10 @@ class MessageHandler
     item_transferer.transfer!
 
     # don't send barcodes to SCSBXMLFetcher that errored in transfer
-    item_transferer.errors.keys.each { |barcode| mapping.delete(barcode) }
+    item_transferer.errors.keys.each { |barcode| source_barcode_to_attributes_map.delete(barcode) }
 
-    xml_fetcher = get_scsb_fetcher(mapping)
-    barcode_to_scsb_xml_mapping = xml.xml_fetcher.translate_to_scsb_xml
+    xml_fetcher = get_scsb_fetcher(source_barcode_to_attributes_map)
+    barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
 
     submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
     submit_collection_updater.update_scsb_items
