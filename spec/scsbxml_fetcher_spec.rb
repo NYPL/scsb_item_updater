@@ -36,7 +36,7 @@ describe SCSBXMLFetcher do
       expect(OAuth2::Client).to receive(:new).at_least(:once).and_return(@fake_oauth_client)
       # Mock actual call to nypl-bibs
       @fake_nypl_bibs_response = double
-      allow(@fake_nypl_bibs_response).to receive(:body).at_least(:once) { '' }
+      allow(@fake_nypl_bibs_response).to receive(:code).at_least(:once) { 500 }
       expect(HTTParty).to receive(:get).at_least(:once).and_return(@fake_nypl_bibs_response)
 
       @fetcher.translate_to_scsb_xml
@@ -52,6 +52,7 @@ describe SCSBXMLFetcher do
 
       # Mock actual call to nypl-bibs
       @fake_nypl_bibs_response = double
+      allow(@fake_nypl_bibs_response).to receive(:code).at_least(:once) { 200 }
       allow(@fake_nypl_bibs_response).to receive(:body).at_least(:once) { '<?xml version=\"1.0\" ?><bibRecords></bibRecords>' }
 
       @fetcher = SCSBXMLFetcher.new(barcode_to_attributes_mapping: { '1234' => { 'customerCode' => 'NA' }, '5678' => { 'customerCode' => nil } })
