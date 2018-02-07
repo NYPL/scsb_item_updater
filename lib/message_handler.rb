@@ -44,7 +44,7 @@ class MessageHandler
   def transfer
     source_barcode_scsb_mapper = get_barcode_mapper
     source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping
-    @logger.info "MAPPING of barcodes to customerCodes: #{source_barcode_to_attributes_map}"
+    @logger.info "MAPPING of barcodes to: #{source_barcode_to_attributes_map}"
     item_transferer = ItemTransferer.new({
       api_url: @settings['scsb_api_url'],
       api_key: @settings['scsb_api_key'],
@@ -75,7 +75,7 @@ class MessageHandler
   def update
     mapper = get_barcode_mapper
     mapping = mapper.barcode_to_attributes_mapping
-    @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
+    @logger.info "MAPPING of barcodes to: #{mapping}"
     xml_fetcher = get_scsb_fetcher(mapping)
 
     barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
