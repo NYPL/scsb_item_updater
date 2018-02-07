@@ -1,5 +1,5 @@
 # A module used to for classes that, when performing their duty, can generate errors that
-# users should know about. For example, an instance of BarcodeToCustomerCodeMapper may
+# users should know about. For example, an instance of BarcodeToScsbAttributesMapper may
 # fail to connect to or get an unexpected response from a server.
 #
 # To use it `include Errorable` and make sure the constuctor initializes `@errors = {}`

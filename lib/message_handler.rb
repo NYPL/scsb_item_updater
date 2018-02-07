@@ -2,7 +2,7 @@ Dir[File.join(__dir__, '*.rb')].each {|file| require file }
 require 'nypl_log_formatter'
 
 class MessageHandler
-  VALID_ACTIONS = ['sync']
+  VALID_ACTIONS = ['update', 'transfer']
 
   #  options message    [Aws::SQS::Types::Message]
   #  options sqs_client [Class: Aws::SQS::Client]
@@ -20,41 +20,8 @@ class MessageHandler
       @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
       @parsed_message = JSON.parse(@message.body)
       if valid?
-        mapper = BarcodeToCustomerCodeMapper.new({barcodes: @parsed_message['barcodes'], api_url: @settings['scsb_api_url'], api_key: @settings['scsb_api_key']})
-        mapping = mapper.barcode_to_customer_code_mapping
-        @logger.info "MAPPING of barcodes to customerCodes: #{mapping}"
-        xml_fetcher = SCSBXMLFetcher.new({
-          oauth_key:    @settings['nypl_oauth_key'],
-          oauth_url:    @settings['nypl_oauth_url'],
-          oauth_secret: @settings['nypl_oauth_secret'],
-          platform_api_url: @settings['platform_api_url'],
-          barcode_to_customer_code_mapping: mapping
-        })
-        barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
-        @logger.info "the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
-
-        submit_collection_updater = SubmitCollectionUpdater.new(
-            barcode_to_scsb_xml_mapping: barcode_to_scsb_xml_mapping,
-            api_url: @settings['scsb_api_url'],
-            api_key: @settings['scsb_api_key'],
-            is_gcd_protected: false,
-            is_dry_run: @settings['is_dry_run'],
-        )
-
-        submit_collection_updater.update_scsb_items
-
-        mailer = ErrorMailer.new(
-          error_hashes: [mapper.errors,
-            xml_fetcher.errors,
-            submit_collection_updater.errors],
-          sqs_message: @parsed_message,
-          from_address:  @settings['email_from_address'],
-          mailer_domain: @settings['smtp_domain'],
-          mailer_username: @settings['smtp_user_name'],
-          mailer_password: @settings['smtp_password'],
-          environment: @settings['environment']
-        )
-        mailer.send_error_email
+        self.send(@parsed_message['action'])
+        @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
       else
         @logger.error("Message '#{@message.body}' contains an unsupported action")
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
@@ -72,5 +39,99 @@ class MessageHandler
   def old_enough?
     seconds_since_publishing = Time.now.utc.to_i - @message.attributes['SentTimestamp'][0..9].to_i
     (seconds_since_publishing >= @settings['minimum_message_age_seconds'].to_i)
+  end
+
+  def transfer
+    source_barcode_scsb_mapper = get_barcode_mapper
+    source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping
+    @logger.info "MAPPING of barcodes to: #{source_barcode_to_attributes_map}"
+    item_transferer = ItemTransferer.new({
+      api_url: @settings['scsb_api_url'],
+      api_key: @settings['scsb_api_key'],
+      barcode_to_attributes_mapping: source_barcode_to_attributes_map,
+      destination_bib_id: @parsed_message['bibRecordNumber']
+    })
+
+    # TODO: possibly wrap this all in a is_dry_run
+    item_transferer.transfer!
+
+    # don't send barcodes to SCSBXMLFetcher that errored in transfer
+    item_transferer.errors.keys.each { |barcode| source_barcode_to_attributes_map.delete(barcode) }
+
+    xml_fetcher = get_scsb_fetcher(source_barcode_to_attributes_map)
+    barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
+
+    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+    submit_collection_updater.update_scsb_items
+
+    send_errors_for([
+      source_barcode_scsb_mapper.errors,
+      item_transferer.errors,
+      xml_fetcher.errors,
+      submit_collection_updater.errors
+    ])
+  end
+
+  def update
+    mapper = get_barcode_mapper
+    mapping = mapper.barcode_to_attributes_mapping
+    @logger.info "MAPPING of barcodes to: #{mapping}"
+    xml_fetcher = get_scsb_fetcher(mapping)
+
+    barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
+    @logger.info "the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+
+    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+
+    submit_collection_updater.update_scsb_items
+    send_errors_for([
+      mapper.errors,
+      xml_fetcher.errors,
+      submit_collection_updater.errors
+    ])
+
+  end
+
+  private
+
+  def get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+    SubmitCollectionUpdater.new(
+        barcode_to_scsb_xml_mapping: barcode_to_scsb_xml_mapping,
+        api_url: @settings['scsb_api_url'],
+        api_key: @settings['scsb_api_key'],
+        is_gcd_protected: @parsed_message['protectCGD'],
+        is_dry_run: @settings['is_dry_run'],
+    )
+  end
+
+  def get_scsb_fetcher(barcode_to_attribute_mapping = {})
+    SCSBXMLFetcher.new({
+      oauth_key:    @settings['nypl_oauth_key'],
+      oauth_url:    @settings['nypl_oauth_url'],
+      oauth_secret: @settings['nypl_oauth_secret'],
+      platform_api_url: @settings['platform_api_url'],
+      barcode_to_attributes_mapping: barcode_to_attribute_mapping
+    })
+  end
+
+  def get_barcode_mapper
+    BarcodeToScsbAttributesMapper.new({
+      barcodes: @parsed_message['barcodes'],
+      api_url: @settings['scsb_api_url'],
+      api_key: @settings['scsb_api_key']
+    })
+  end
+
+  def send_errors_for(errors = [])
+    mailer = ErrorMailer.new(
+      error_hashes: errors,
+      sqs_message: @parsed_message,
+      from_address:  @settings['email_from_address'],
+      mailer_domain: @settings['smtp_domain'],
+      mailer_username: @settings['smtp_user_name'],
+      mailer_password: @settings['smtp_password'],
+      environment: @settings['environment']
+    )
+    mailer.send_error_email
   end
 end

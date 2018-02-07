@@ -20,6 +20,7 @@ class SubmitCollectionUpdater
     @api_key = options[:api_key]
     @is_gcd_protected = options[:is_gcd_protected] || false
     @is_dry_run = options[:is_dry_run]
+    @logger = NyplLogFormatter.new(STDOUT)
   end
 
   def update_scsb_items
@@ -28,7 +29,13 @@ class SubmitCollectionUpdater
     else
       puts "Updating the following #{@barcode_to_scsb_xml_mapping.keys.length} barcodes: #{@barcode_to_scsb_xml_mapping.keys.join(',')}"
       @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
-        update_item(barcode, scsb_xml)
+        # it stops calling the API to update the record if no valid XML
+        if scsb_xml.empty?
+          add_or_append_to_errors(barcode, 'Not have valid SCSB XML. Stops submitting this record')
+          @logger.error("No valid XML for the barcode: #{barcode}. It has stopped updating the record.")
+        else
+          update_item(barcode, scsb_xml)
+        end
       end
     end
   end
@@ -47,10 +54,10 @@ private
     begin
       # Remove <xml version=... tag
       stripped_doc = Nokogiri::XML(scsb_xml).root.to_s
-      response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'nypl', isCGDProtected: @is_gcd_protected})
+      response = HTTParty.post("#{@api_url}/sharedCollection/submitCollection", headers: headers, body: stripped_doc, query: {institution: 'NYPL', isCGDProtected: @is_gcd_protected})
       parsed_body = JSON.parse(response.body)
 
-      if parsed_body[0] && parsed_body[0]['message'] && parsed_body[0]['message'] != 'SuccessRecord'
+      if parsed_body[0] && parsed_body[0]['message'] && !parsed_body[0]['message'].downcase.include?('success')
         add_or_append_to_errors(barcode, parsed_body[0]['message'])
       end
 

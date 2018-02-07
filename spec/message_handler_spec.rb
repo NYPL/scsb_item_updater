@@ -7,7 +7,7 @@ describe MessageHandler do
   describe "allowable actions" do
 
     it "has a whitelist of allowable actions" do
-      expect(MessageHandler::VALID_ACTIONS).to eq(['sync'])
+      expect(MessageHandler::VALID_ACTIONS).to eq(['update', 'transfer'])
     end
 
   end
@@ -25,7 +25,6 @@ describe MessageHandler do
       @fake_message = double(:body => JSON.generate({action: 'iamsupported'}), receipt_handle: "some-id", message_attributes: {}, :attributes => {"SentTimestamp" => (Time.now.to_i - 86400).to_s})
     end
 
-    # TODO: This will be refactored soon to check something like message_handler.errrors includes some string
     it "will log an error & delete the message" do
       fake_sqs_client = double(:delete_message)
       message_handler = MessageHandler.new({sqs_client: fake_sqs_client, message: @fake_message, settings: {'sqs_queue_url' => 'http://example.com', 'minimum_message_age_seconds' => "300"}})

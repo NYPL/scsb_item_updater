@@ -11,7 +11,7 @@ describe SubmitCollectionUpdater do
       })
     end
 
-    it "returns an empty hash before barcode_to_customer_code_mapping is called" do
+    it "returns an empty hash before update_scsb_itemsis called" do
       expect(@submit_collection_updater.errors).to eq({})
     end
 
@@ -50,7 +50,7 @@ describe SubmitCollectionUpdater do
         "http://example.com/sharedCollection/submitCollection",
         headers: request_headers,
         body: Nokogiri::XML(xml).root.to_s,
-        query: {institution: 'nypl', isCGDProtected: false}).and_return(fake_http_response)
+        query: {institution: 'NYPL', isCGDProtected: false}).and_return(fake_http_response)
 
       updater = SubmitCollectionUpdater.new(
         barcode_to_scsb_xml_mapping: {"123" => xml},
@@ -59,6 +59,22 @@ describe SubmitCollectionUpdater do
       )
 
       updater.update_scsb_items
+    end
+
+    it 'stops submitting and throws an error if there is no valid XML' do
+      xml = ''
+      request_headers = {Accept: "application/json", api_key: "fake-key", "Content-Type": 'application/json'}
+
+      updater = SubmitCollectionUpdater.new(
+        barcode_to_scsb_xml_mapping: {"456" => xml},
+        api_url: "http://example.com",
+        api_key: 'fake-key'
+      )
+
+      updater.update_scsb_items
+
+      error_message = 'Not have valid SCSB XML. Stops submitting this record'
+      expect(updater.errors['456']).to include(error_message)
     end
   end
 

@@ -7,21 +7,19 @@ class SCSBXMLFetcher
   include Errorable
 
   # options is a hash used to instantiate a SCSBXMLFetcher
-  #  options token [String]
   #  options oauth_url [String]
   #  options oauth_key [String]
   #  options oauth_secret [String]
   #  options platform_api_url [String]
-  #  options barcode_to_customer_code_mapping [Hash]
-  #    This is the output of BarcodeToCustomerCodeMapper#barcode_to_customer_code_mapping
+  #  options barcode_to_attributes_mapping [Hash]
+  #    This is the output of BarcodeToScsbAttributesMapper#barcode_to_attributes_mapping
   def initialize(options = {})
-    @token = nil
     @errors = {}
     @oauth_url = options[:oauth_url]
     @oauth_key = options[:oauth_key]
     @oauth_secret = options[:oauth_secret]
     @platform_api_url = options[:platform_api_url]
-    @barcode_to_customer_code_mapping = options[:barcode_to_customer_code_mapping]
+    @barcode_to_attributes_mapping = options[:barcode_to_attributes_mapping]
     @logger = NyplLogFormatter.new(STDOUT)
   end
 
@@ -29,23 +27,31 @@ class SCSBXMLFetcher
   def translate_to_scsb_xml
     set_token
     results = {}
-    @barcode_to_customer_code_mapping.each do |barcode, customer_code|
-      if customer_code
+    @barcode_to_attributes_mapping.each do |barcode, scsb_attributes|
+      if scsb_attributes['customerCode']
         begin
-          results[barcode] = HTTParty.get(
+          response = HTTParty.get(
             "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
             query: {
-              customerCode: customer_code,
+              customerCode: scsb_attributes['customerCode'],
               barcode: barcode,
               includeFullBibTree: 'false'
             },
             headers: { 'Authorization' => "Bearer #{@oauth_token}" }
-          ).body
+          )
+
+          # checks response_body to see if it contains valid XML
+          if response.code >= 400
+            @logger.error("No valid SCSB XML from NYPL-Bibs for the barcode: #{barcode}.")
+            add_or_append_to_errors(barcode, 'Not have valid SCSB XML')
+          else
+            results[barcode] = response.body
+          end
         rescue Exception => e
           add_or_append_to_errors(barcode, 'Bad response from NYPL Bibs API')
         end
       else
-        @logger.error("Not valid customer code for the barcode: #{barcode}.")
+        @logger.error("No valid customer code for the barcode: #{barcode}.")
         add_or_append_to_errors(barcode, 'Not have valid customer code')
       end
     end
