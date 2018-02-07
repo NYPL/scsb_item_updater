@@ -7,7 +7,6 @@ class SCSBXMLFetcher
   include Errorable
 
   # options is a hash used to instantiate a SCSBXMLFetcher
-  #  options token [String]
   #  options oauth_url [String]
   #  options oauth_key [String]
   #  options oauth_secret [String]
@@ -15,7 +14,6 @@ class SCSBXMLFetcher
   #  options barcode_to_attributes_mapping [Hash]
   #    This is the output of BarcodeToScsbAttributesMapper#barcode_to_attributes_mapping
   def initialize(options = {})
-    @token = nil
     @errors = {}
     @oauth_url = options[:oauth_url]
     @oauth_key = options[:oauth_key]
