@@ -94,6 +94,15 @@ class MessageHandler
 
   private
 
+  def nypl_platform_client
+    NyplPlatformClient.new({
+      oauth_url: @settings['nypl_oauth_url'],
+      oauth_key: @settings['nypl_oauth_key'],
+      oauth_secret: @settings['nypl_oauth_secret'],
+      platform_api_url: @settings['platform_api_url']
+    })
+  end
+
   def get_submit_collection_updater(barcode_to_scsb_xml_mapping)
     SubmitCollectionUpdater.new(
         barcode_to_scsb_xml_mapping: barcode_to_scsb_xml_mapping,
@@ -106,10 +115,7 @@ class MessageHandler
 
   def get_scsb_fetcher(barcode_to_attribute_mapping = {})
     SCSBXMLFetcher.new({
-      oauth_key:    @settings['nypl_oauth_key'],
-      oauth_url:    @settings['nypl_oauth_url'],
-      oauth_secret: @settings['nypl_oauth_secret'],
-      platform_api_url: @settings['platform_api_url'],
+      nypl_platform_client: nypl_platform_client,
       barcode_to_attributes_mapping: barcode_to_attribute_mapping
     })
   end
