@@ -13,6 +13,7 @@ class SubmitCollectionUpdater
   #  options is_gcd_protected [Boolean]
   #  options barcode_to_scsb_xml_mapping [Hash]
   #    This is the output of SCSBXMLFetchertranslate_to_scsb_xml
+  #  options is_dry_run [String]
   def initialize(options = {})
     @errors = {}
     @barcode_to_scsb_xml_mapping = options[:barcode_to_scsb_xml_mapping]

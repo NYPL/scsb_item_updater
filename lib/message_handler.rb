@@ -126,7 +126,8 @@ class MessageHandler
   def get_refiler(barcodes_for_refile)
     Refiler.new(
       nypl_platform_client: nypl_platform_client,
-      barcodes: barcodes_for_refile
+      barcodes: barcodes_for_refile,
+      is_dry_run: @settings['is_dry_run']
     )
   end
 
@@ -136,7 +137,7 @@ class MessageHandler
         api_url: @settings['scsb_api_url'],
         api_key: @settings['scsb_api_key'],
         is_gcd_protected: @parsed_message['protectCGD'],
-        is_dry_run: @settings['is_dry_run'],
+        is_dry_run: @settings['is_dry_run']
     )
   end
 
