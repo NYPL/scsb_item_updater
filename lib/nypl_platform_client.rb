@@ -15,7 +15,18 @@ class NyplPlatformClient
   end
 
   # Returns an HTTParty response
+  def refile(barcode)
+    get_token
+    HTTParty.post(
+      "#{@platform_api_url}/api/v0.1/recap/refile-requests",
+      headers: {'Authorization' => "Bearer #{@oauth_token}", 'Accept'=>'application/json'},
+      body: JSON.generate({itemBarcode: barcode})
+    )
+  end
+
+  # Returns an HTTParty response
   def fetch_scsbxml_for(barcode, customer_code)
+    get_token
     HTTParty.get(
       "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
       query: {
