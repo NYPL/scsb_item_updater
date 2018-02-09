@@ -2,10 +2,11 @@ require 'mail'
 require 'erb'
 
 class ErrorMailer
-  attr_reader :from_address, :mailer_domain, :mailer_username,
-    :mailer_password, :sqs_message
+  attr_reader :from_address, :cc_addresses, :mailer_domain, :mailer_username,
+    :mailer_password, :sqs_message, :environment
 
   #  options :from_address    [String]
+  #  options :cc_addresses    [String]
   #  options :mailer_domain   [String]
   #  options :mailer_username [String]
   #  options :mailer_password [String]
@@ -16,6 +17,7 @@ class ErrorMailer
     default_options = {error_hashes: [], sqs_message: {}}
     options = default_options.merge(options)
     @from_address     = options[:from_address]
+    @cc_addresses     = options[:cc_addresses]
     @mailer_domain    = options[:mailer_domain]
     @mailer_username  = options[:mailer_username]
     @mailer_password  = options[:mailer_password]
@@ -53,14 +55,15 @@ class ErrorMailer
 
   private
 
-
   def get_mailer(error_mailer)
     if @environment == 'production'
       Mail.new do
-        from error_mailer.from_address
-        to error_mailer.sqs_message['email']
-        subject "ReCAP: Errors with a recent action"
-        body    error_mailer.email_body
+        from     error_mailer.from_address
+        to       error_mailer.sqs_message['email']
+        subject  "ReCAP: Errors with a recent action"
+        # the value that cc takes is an array, so we split the environment variable with comma
+        cc       error_mailer.cc_addresses.split(',')
+        body     error_mailer.email_body
         delivery_method :smtp, {
           address: error_mailer.mailer_domain,
           port: 587,
@@ -73,11 +76,13 @@ class ErrorMailer
      end
     else
       Mail.new do
-        from error_mailer.from_address
-        to error_mailer.sqs_message['email']
-        subject "ReCAP: Errors with a recent action"
-        body    error_mailer.email_body
-        delivery_method :logger
+        from     error_mailer.from_address
+        to       error_mailer.sqs_message['email']
+        # the value that cc takes is an array, so we split the environment variable with comma
+        subject  "ReCAP: Errors with a recent action"
+        cc       error_mailer.cc_addresses.split(',')
+        body     error_mailer.email_body
+        delivery_method (error_mailer.environment == 'test') ? :test : :logger
      end
     end
   end
