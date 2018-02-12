@@ -36,7 +36,6 @@ describe NyplPlatformClient do
       )
 
       @client.fetch_scsbxml_for('123', 'NA')
-  end
-
+    end
   end
 end

@@ -18,25 +18,22 @@ class Refiler
   end
 
   def refile!
-    if (@is_dry_run)
-      puts "This is a dry run for development. It will not refile any SCSB collection item."
+    if @is_dry_run
+      puts 'This is a dry run for development. It will not refile any SCSB collection item.'
+    elsif @barcodes.empty?
+      @logger.error('No valid barcodes for refile')
+      puts 'No valid barcodes for refile'
     else
-      if @barcodes.empty?
-        @logger.error('No valid barcodes for refile')
-        puts 'No valid barcodes for refile'
-      else
-        @barcodes.each do |barcode|
-          begin
-            response = @nypl_platform_client.refile(barcode)
-            if response.code >= 400
-              add_or_append_to_errors(barcode, JSON.parse(response.body)['message'])
-            end
-          rescue Exception => e
-            add_or_append_to_errors(barcode, 'Bad response from NYPL refile API')
+      @barcodes.each do |barcode|
+        begin
+          response = @nypl_platform_client.refile(barcode)
+          if response.code >= 400
+            add_or_append_to_errors(barcode, JSON.parse(response.body)['message'])
           end
+        rescue Exception => e
+          add_or_append_to_errors(barcode, 'Bad response from NYPL refile API')
         end
       end
     end
   end
-
 end

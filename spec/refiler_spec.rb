@@ -4,7 +4,7 @@ describe Refiler do
   before do
     @refiler = Refiler.new(
       barcodes:     ['a-barcode'],
-      nypl_platform_client: NyplPlatformClient.new()
+      nypl_platform_client: NyplPlatformClient.new
     )
   end
 
@@ -12,7 +12,7 @@ describe Refiler do
     before do
       @nypl_platform_client = instance_double('NyplPlatformClient')
       @refiler = Refiler.new(
-        barcodes: ['1234', '5678'],
+        barcodes: %w[1234 5678],
         nypl_platform_client: @nypl_platform_client
       )
     end
@@ -32,10 +32,10 @@ describe Refiler do
       # Mock response from NYPL Refile API
       @fake_nypl_refile_response = double(
         code: 500,
-        body: JSON.generate({:message => 'here is an error' })
+        body: JSON.generate(message: 'here is an error')
       )
 
-      expect(@nypl_platform_client).to receive(:refile).with("1234").and_return(@fake_nypl_refile_response)
+      expect(@nypl_platform_client).to receive(:refile).with('1234').and_return(@fake_nypl_refile_response)
       @refiler.refile!
       error_message = 'here is an error'
       expect(@refiler.errors['1234']).to include(error_message)
@@ -56,5 +56,4 @@ describe Refiler do
       expect(@nypl_platform_client).to_not receive(:refile)
     end
   end
-
 end

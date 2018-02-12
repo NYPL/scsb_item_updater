@@ -5,7 +5,7 @@ describe SCSBXMLFetcher do
     before do
       @nypl_platform_client = instance_double('NyplPlatformClient')
       @fetcher = SCSBXMLFetcher.new(
-        barcode_to_attributes_mapping: { '1234' => { 'customerCode' => 'NA' }, '5678' => { 'customerCode' => nil }},
+        barcode_to_attributes_mapping: { '1234' => { 'customerCode' => 'NA' }, '5678' => { 'customerCode' => nil } },
         nypl_platform_client: @nypl_platform_client
       )
     end
