@@ -127,6 +127,7 @@ class MessageHandler
       error_hashes: errors,
       sqs_message: @parsed_message,
       from_address:  @settings['email_from_address'],
+      cc_addresses:  @settings['email_cc_addresses'],
       mailer_domain: @settings['smtp_domain'],
       mailer_username: @settings['smtp_user_name'],
       mailer_password: @settings['smtp_password'],

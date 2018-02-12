@@ -14,4 +14,5 @@ smtp_domain:    <%= ENV['SMTP_DOMAIN'] %>
 smtp_user_name: <%= ENV['SMTP_USER_NAME'] %>
 smtp_password:  <%= ENV['SMTP_PASSWORD'] %>
 email_from_address: <%= ENV['EMAIL_FROM_ADDRESS'] %>
+email_cc_addresses: <%= ENV['EMAIL_CC_ADDRESSES'] %>
 environment:  <%= ENV['ENVIRONMENT'] %>
