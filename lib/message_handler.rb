@@ -113,7 +113,7 @@ class MessageHandler
   # If a records exits in the errors of submit_collection_updater, we don't refile it
   # This method is to get all the good records and returns an array of the records to be refiled
   def map_barcodes_for_refile(all_records, records_with_submission_errors)
-    all_records - records_with_submission_errors.keys
+    all_records.keys - records_with_submission_errors.keys
   end
 
   def get_refiler(barcodes_for_refile)
