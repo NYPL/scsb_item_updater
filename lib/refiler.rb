@@ -31,6 +31,8 @@ class Refiler
           if response.code >= 400
             add_or_append_to_errors(barcode, JSON.parse(response.body)['message'])
           end
+
+          puts "#{barcode} refiling completed"
         rescue Exception => e
           add_or_append_to_errors(barcode, 'Bad response from NYPL refile API')
         end

@@ -21,7 +21,8 @@ class NyplPlatformClient
       "#{@platform_api_url}/api/v0.1/recap/refile-requests",
       headers: {
         'Authorization' => "Bearer #{@oauth_token}",
-        'Content-Type' => 'application/json'
+        'Content-Type' => 'application/json',
+        'Accept' => 'application/json'
       },
       body: JSON.generate(itemBarcode: barcode)
     )

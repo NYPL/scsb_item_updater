@@ -10,7 +10,7 @@ describe NyplPlatformClient do
     it "calls the platform API with expected params" do
       expect(OAuth2::Client).to receive(:new).at_least(:once).and_return(@fake_oauth_client)
 
-      request_headers = {'Accept' => "application/json", 'Authorization' => 'Bearer myToken'}
+      request_headers = {"Authorization"=>"Bearer myToken", "Content-Type"=>"application/json", "Accept"=>"application/json"}
       expect(HTTParty).to receive(:post).at_least(:once).with(
         "https://example.com/api/v0.1/recap/refile-requests",
         headers: request_headers,
