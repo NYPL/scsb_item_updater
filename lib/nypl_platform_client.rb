@@ -19,8 +19,11 @@ class NyplPlatformClient
     get_token
     HTTParty.post(
       "#{@platform_api_url}/api/v0.1/recap/refile-requests",
-      headers: {'Authorization' => "Bearer #{@oauth_token}", 'Accept'=>'application/json'},
-      body: JSON.generate({itemBarcode: barcode})
+      headers: {
+        'Authorization' => "Bearer #{@oauth_token}",
+        'Content-Type' => 'application/json'
+      },
+      body: JSON.generate(itemBarcode: barcode)
     )
   end
 
