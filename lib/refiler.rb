@@ -27,6 +27,7 @@ class Refiler
       @barcodes.each do |barcode|
         begin
           response = @nypl_platform_client.refile(barcode)
+
           if response.code >= 400
             add_or_append_to_errors(barcode, JSON.parse(response.body)['message'])
           end
