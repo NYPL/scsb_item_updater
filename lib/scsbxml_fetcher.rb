@@ -1,5 +1,3 @@
-require 'oauth2'
-require 'httparty'
 require 'nypl_log_formatter'
 require File.join('.', 'lib', 'errorable')
 
@@ -7,38 +5,23 @@ class SCSBXMLFetcher
   include Errorable
 
   # options is a hash used to instantiate a SCSBXMLFetcher
-  #  options oauth_url [String]
-  #  options oauth_key [String]
-  #  options oauth_secret [String]
-  #  options platform_api_url [String]
+  #  options nypl_platform_client          [NyplPlatformClient]
   #  options barcode_to_attributes_mapping [Hash]
   #    This is the output of BarcodeToScsbAttributesMapper#barcode_to_attributes_mapping
   def initialize(options = {})
     @errors = {}
-    @oauth_url = options[:oauth_url]
-    @oauth_key = options[:oauth_key]
-    @oauth_secret = options[:oauth_secret]
-    @platform_api_url = options[:platform_api_url]
+    @nypl_platform_client = options[:nypl_platform_client]
     @barcode_to_attributes_mapping = options[:barcode_to_attributes_mapping]
     @logger = NyplLogFormatter.new(STDOUT)
   end
 
   # returns a hash where the keys are barcodes and the values are SCSBXML Strings
   def translate_to_scsb_xml
-    set_token
     results = {}
     @barcode_to_attributes_mapping.each do |barcode, scsb_attributes|
       if scsb_attributes['customerCode']
         begin
-          response = HTTParty.get(
-            "#{@platform_api_url}/api/v0.1/recap/nypl-bibs",
-            query: {
-              customerCode: scsb_attributes['customerCode'],
-              barcode: barcode,
-              includeFullBibTree: 'false'
-            },
-            headers: { 'Authorization' => "Bearer #{@oauth_token}" }
-          )
+          response = @nypl_platform_client.fetch_scsbxml_for(barcode, scsb_attributes['customerCode'])
 
           # checks response_body to see if it contains valid XML
           if response.code >= 400
@@ -56,13 +39,5 @@ class SCSBXMLFetcher
       end
     end
     results
-  end
-
-  private
-
-  # TODO: We should cache tokens and retry once they expire
-  def set_token
-    client = OAuth2::Client.new(@oauth_key, @oauth_secret, site: @oauth_url)
-    @oauth_token = client.client_credentials.get_token.token
   end
 end
