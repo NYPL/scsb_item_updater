@@ -73,7 +73,7 @@ Merging to certain branches automatically deploys to the environment associated 
 that branch.
 
 Merging `master` => `development` automatically deploys to the development environment. (after tests pass)
-Merging `development` => `master` automatically deploys to the master environment. (after tests pass)
+Merging `development` => `production` automatically deploys to the production environment. (after tests pass)
 
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
