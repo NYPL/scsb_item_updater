@@ -1,0 +1,2 @@
+This directory holds scripts that are fired off by Travis CI
+for continuous deployment.
