@@ -69,8 +69,17 @@ private
       parsed_body['searchResultRows'].each do |result_row|
         # guard against the off-chance SCSB returns barcode that wasn't requested
         if @barcodes.include? result_row['barcode']
-          # result[result_row['barcode']] = {'customerCode' => result_row['customerCode']}
           result[result_row['barcode']] = result_row
+        end
+
+        # https://jira.nypl.org/browse/SCC-310 describes a case where in some cases, the top-level
+        # barcode & customerCode are null and we must descend into the `searchItemResultRows` Array
+        if result_row['barcode'].nil?
+          result_row['searchItemResultRows'].each do |item_result_row|
+            if @barcodes.include? item_result_row['barcode']
+              result[item_result_row['barcode']] = item_result_row
+            end
+          end
         end
       end
 
