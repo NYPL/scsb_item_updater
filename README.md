@@ -74,7 +74,7 @@ Our branches (in order or stability are):
 
 We use Travis for continuous deployment.
 Merging to certain branches automatically deploys to the environment associated to
-that branch.
+that branch. Here are the [travis build settings](https://travis-ci.org/NYPL-discovery/scsb_item_updater/settings).
 
 Merging `master` => `development` automatically deploys to the development environment. (after tests pass)
 Merging `development` => `production` automatically deploys to the production environment. (after tests pass)
@@ -82,3 +82,48 @@ Merging `development` => `production` automatically deploys to the production en
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
 The approach is inspired by [this blog post](https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/) ([google cached version](https://webcache.googleusercontent.com/search?q=cache:NodZ-GZnk6YJ:https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/+&cd=1&hl=en&ct=clnk&gl=us&client=firefox-b-1-ab)).
+
+## Provisioning
+
+This application is runs on Amazon ECS.
+
+### ECR Repository
+
+It should be named `scsb_item_updater`.
+
+### Task Definition
+
+It should be of type EC2.
+
+| Attribute    | Value                |
+|:-------------|:---------------------|
+| Name         | scsb-item-updater    |
+| Task Role    | ecsTaskExecutionRole |
+| Network Mode | Default              |
+| Task Role    | ecsTaskExecutionRole |
+
+#### Container Settings Within the Task Definition
+
+| Attribute         | Value                                                        |
+|:------------------|:-------------------------------------------------------------|
+| Name              | scsb_item_updater                                            |
+| Image URL         | ...whatever you created in [ECR Repository](#ecr-repository) |
+| Memory Limit      | 400 MiB                                                      |
+| Log configuration | Check "Auto-configure CloudWatch Logs"                       |
+
+
+Set the appropriate "Env Variables".
+See [.env.example](config/.env.example).
+
+### Cluster
+
+| Attribute                   | Value                                                       |
+|:----------------------------|:------------------------------------------------------------|
+| Cluster name                | scsb-item-updater-[ENVIRONMENT]                             |
+| EC2 Instance Type           | t2.small                                                    |
+| Number of Instances         | 1                                                           |
+| VPC                         | the environment (i.e. production, development) specific VPC |
+| Subnets                     | A **private** subnet                                        |
+| Key Pair                    | fill this in                                                |
+| Security Group              | Inbound: open on 22 & 80, Outbound: All                     |
+| Container instance IAM role | ecsInstanceRole                                             |
