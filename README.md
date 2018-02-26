@@ -51,7 +51,30 @@ _...for a complete list of environment variables see `./config/.env`_
 1.  `ruby consume_messages.rb`
 2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
-## Deploying
+## Git Workflow & Deployment
 
-TODO: Mention Delay
-TODO: Add this to our existing SCSB architecture diagram
+Our branches (in order or stability are):
+
+| Branch      | Environment | AWS Account     |
+|:------------|:------------|:----------------|
+| master      | none        | none            |
+| development | development | aws-sandbox     |
+| production  | production  | aws-digital-dev |
+
+### Cutting A Feature Branch
+
+1. Feature branches are cut from `master`.
+2. Once the feature branch is ready to be merged, file a pull request of the branch _into_ master.
+
+### Deploying
+
+We use Travis for continuous deployment.
+Merging to certain branches automatically deploys to the environment associated to
+that branch.
+
+Merging `master` => `development` automatically deploys to the development environment. (after tests pass)
+Merging `development` => `production` automatically deploys to the production environment. (after tests pass)
+
+For insight into how CD works look at [.travis.yml](./.travis.yml) and the
+[continuous_deployment](./continuous_deployment) directory.
+The approach is inspired by [this blog post](https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/) ([google cached version](https://webcache.googleusercontent.com/search?q=cache:NodZ-GZnk6YJ:https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/+&cd=1&hl=en&ct=clnk&gl=us&client=firefox-b-1-ab)).
