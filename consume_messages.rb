@@ -9,6 +9,11 @@ Dotenv.load(File.join('.', 'config', '.env'))
 require 'erb'
 require 'yaml'
 
+# Without this STDOUT will buffer and logs won't appear until the buffer flushes,
+# In practice, that means that logs won't appear in CloudWatch until the
+# container dies.
+STDOUT.sync = true
+
 path_to_settings = File.join(__dir__, "config", "settings.yml")
 settings = YAML.load(ERB.new(File.read(path_to_settings)).result)
 logger     = NyplLogFormatter.new(STDOUT)
