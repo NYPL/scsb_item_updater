@@ -7,6 +7,7 @@ gem 'oauth2',   '~> 1.4'
 gem 'nokogiri', '~> 1.8', '>= 1.8.1'
 gem 'nypl_log_formatter', '~> 0.1.1'
 gem 'mail', '~> 2.6', '>= 2.6.3'
+gem 'resque', '~> 1.27', '>= 1.27.4'
 
 group :development, :test do
   gem 'pry',   '~> 0.11.3'

@@ -25,6 +25,7 @@ the staff who initiated the update. (Success / failure)
 
 #### Setup
 
+1.  Ensure you have Redis installed & running on your machine (`brew install redis`)
 1.  `cp ./config/.env.example ./config/.env`
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
