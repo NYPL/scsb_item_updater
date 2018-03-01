@@ -1,6 +1,5 @@
+require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
-require 'httparty'
-require 'json'
 
 class ItemTransferer
   include Errorable

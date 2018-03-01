@@ -1,5 +1,4 @@
-Dir[File.join(__dir__, '*.rb')].each {|file| require file }
-require 'nypl_log_formatter'
+require File.join(__dir__, '..', 'boot')
 
 class MessageHandler
   VALID_ACTIONS = ['update', 'transfer']
@@ -10,7 +9,7 @@ class MessageHandler
   def initialize(options = {})
     @message    = options[:message]
     @sqs_client = options[:sqs_client]
-    @logger     = NyplLogFormatter.new(STDOUT)
+    @logger     = Application.logger
     @settings   = options[:settings]
     @parsed_message = {}
   end
