@@ -18,7 +18,7 @@ Application.logger.info('Started. Polling for messages')
 
 poller.poll(poll_options) do |messages|
   messages.each do |message|
-    message_handler = MessageHandler.new({message: message, sqs_client: sqs_client, settings: settings})
+    message_handler = SQSMessageHandler.new({message: message, sqs_client: sqs_client, settings: settings})
     message_handler.handle
   end
 end

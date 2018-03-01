@@ -1,6 +1,6 @@
 require File.join(__dir__, '..', 'boot')
 
-class MessageHandler
+class SQSMessageHandler
   VALID_ACTIONS = ['update', 'transfer']
 
   #  options message    [Aws::SQS::Types::Message]
