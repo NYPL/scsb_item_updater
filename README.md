@@ -43,12 +43,7 @@ the staff who initiated the update. (Success / failure)
 #### Running from Docker build
 
 ```
-docker run -e AWS_KEY=*** \
--e AWS_SECRET=*** \
--e SQS_QUEUE_URL=*** \
--e POLLING_INTERVAL_SECONDS=*** \
-...snip
-[IMAGENAME-OR-SHA]
+docker run --env-file ./config/.env [IMAGENAME-OR-SHA]
 ```
 
 _...for a complete list of environment variables see `./config/.env`_
