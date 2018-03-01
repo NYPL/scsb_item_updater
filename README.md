@@ -32,7 +32,7 @@ the staff who initiated the update. (Success / failure)
 
 #### Usage
 
-`ruby ./consume_messages.rb`
+`ruby ./dequeue_from_sqs.rb`
 
 ### Docker
 
@@ -53,7 +53,7 @@ docker run -e AWS_KEY=*** \
 
 _...for a complete list of environment variables see `./config/.env`_
 
-1.  `ruby consume_messages.rb`
+1.  `ruby dequeue_from_sqs.rb.rb`
 2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
 ## Git Workflow & Deployment
