@@ -10,6 +10,8 @@ require 'mail'
 require 'erb'
 require 'yaml'
 require 'nypl_log_formatter'
+require 'resque'
+
 Dir.glob('./lib/*.rb').each do |file|
   require file
 end
@@ -32,3 +34,7 @@ Application.env = Application.settings['environment'] || 'development'
 # container dies.
 STDOUT.sync = true
 Application.logger = NyplLogFormatter.new(STDOUT)
+
+# Configure Redis
+Resque.redis = Application.settings['redis_domain_and_port']
+Resque.redis.namespace = "scscb_item_updater"

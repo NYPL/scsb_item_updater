@@ -16,3 +16,4 @@ smtp_password:  <%= ENV['SMTP_PASSWORD'] %>
 email_from_address: <%= ENV['EMAIL_FROM_ADDRESS'] %>
 email_cc_addresses: <%= ENV['EMAIL_CC_ADDRESSES'] %>
 environment:  <%= ENV['ENVIRONMENT'] %>
+redis_domain_and_port: <%= ENV['REDIS_DOMAIN_AND_PORT'] %>
