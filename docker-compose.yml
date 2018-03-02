@@ -16,6 +16,6 @@ services:
     environment:
       - QUEUE=*
       - REDIS_DOMAIN_AND_PORT=redis:6379
-    entrypoint: 'rake resque:work'
+    entrypoint: ["rake", "resque:work"]
     depends_on:
       - 'redis'
