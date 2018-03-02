@@ -1,3 +1,3 @@
 require File.join('.', 'boot')
-Application.logger.info("Reque worker online")
+Application.logger.info("Resque worker online")
 require 'resque/tasks'
