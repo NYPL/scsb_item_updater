@@ -16,8 +16,26 @@ The rough workflow for this is, per barcode:
 2.  Hit [our platform api](https://platformdocs.nypl.org/#/recap/get_v0_1_recap_nypl_bibs) with the customer code and barcode and receive back SCSBXML.
 3.  Do minor massaging and post updated information to the [SCSB "submit collection" endpoint](https://uat-recap.htcinc.com:9093/swagger-ui.html#!/shared-collection-rest-controller/submitCollection).
 
-After the updates - this app will, in some way, shape or form send an email to
-the staff who initiated the update. (Success / failure)
+## Application Architecture
+
+### High Level Workflow:
+
+1.  Consume messages from Amazon SQS.
+2.  Persist those messages into Redis, and delete them from SQS.
+3.  Work the messages from Redis using [resque](https://github.com/resque/resque) in a separate process.
+
+### Details
+
+#### From SQS -> Redis
+
+1.  `dequeue_from_sqs.rb` consumes messages from SQS. It does that by instantiating an `SQSMessageHandler`.
+1.  `SQSMessageHandler` makes sure that a message is well formed & old enough to be worked.  
+If it is, it's persisted into Redis and deleted from SQS.
+
+#### Working Redis
+
+1.  `ProcessResqueMessage`, a [resque job](https://github.com/resque/resque#overview), uses an instance of `ResqueMessageHandler` do all the hard work.
+1.  `ResqueMessageHandler` is what actually inspects the message, makes the appropriate API calls (through other classes), and conditionally sends error reports.
 
 ## Installing & Running
 
@@ -50,6 +68,32 @@ _...for a complete list of environment variables see `./config/.env`_
 
 1.  `ruby dequeue_from_sqs.rb.rb`
 2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
+
+## Running Resque
+
+#### Debugging Resque Workers
+
+From an IRB session (`$bundle exec irb -r ./boot.rb`).
+
+This [Stack Overflow thread](http://stackoverflow.com/questions/8798357/inspect-and-retry-resque-jobs-via-redis-cli) has good tips on ways to inspect the queue.
+
+```
+> Resque.info
+  => {:pending=>0, :processed=>193, :queues=>1, :workers=>2, :working=>0, :failed=>168, :servers=>["redis://fqdn.com:6379/0"], :environment=>"development"}
+
+# Print exceptions
+> Resque::Failure.all(0,20).each { |job|
+     puts "#{job["exception"]}  #{job["backtrace"]}"
+  }
+
+# Reset the failed jobs count
+> Resque::Failure.clear
+
+# Restarting all failed jobs
+(Resque::Failure.count-1).downto(0).each do |i|
+  Resque::Failure.requeue(i)
+end
+```
 
 ## Git Workflow & Deployment
 
