@@ -20,9 +20,11 @@ The rough workflow for this is, per barcode:
 
 ### High Level Workflow:
 
-1.  Consume messages from Amazon SQS.
-2.  Persist those messages into Redis, and delete them from SQS.
-3.  Work the messages from Redis using [resque](https://github.com/resque/resque) in a separate process.
+This application...
+
+1.  Consumes messages from Amazon SQS.
+2.  Persists those messages into Redis, and delete them from SQS.
+3.  Works messages from Redis using [resque](https://github.com/resque/resque) in a separate process.
 
 ### Details
 
@@ -48,26 +50,19 @@ If it is, it's persisted into Redis and deleted from SQS.
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
 
-#### Usage
+#### Running Natively Locally
 
-`ruby ./dequeue_from_sqs.rb`
+1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work`
+1.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
-### Docker
+#### Running From Docker Locally
 
-#### Building a Docker Image
+You can use docker and [`docker-compose`](https://docs.docker.com/compose/overview/) to run the app locally too.
+`docker compose` will even bring up its own instance of Redis.
 
-`docker build --no-cache .`
-
-#### Running from Docker build
-
-```
-docker run --env-file ./config/.env [IMAGENAME-OR-SHA]
-```
-
-_...for a complete list of environment variables see `./config/.env`_
-
-1.  `ruby dequeue_from_sqs.rb.rb`
-2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
+1.  Ensure you have correct environment variables setup in `./config/.env`
+1.  Build the docker image: `docker build --no-cache -t scsb_item_updater:latest .`
+1.  `docker compose up`
 
 ## Running Resque
 
