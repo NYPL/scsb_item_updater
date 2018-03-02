@@ -12,6 +12,7 @@ class ResqueMessageHandler
     self.send(@parsed_message['action'])
   end
 
+  # TODO: Add logging of results here.
   def transfer
     source_barcode_scsb_mapper = get_barcode_mapper
     source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping

@@ -16,6 +16,7 @@ class Refiler
     @is_dry_run = options[:is_dry_run]
   end
 
+  # TODO: Log, don't print
   def refile!
     if @is_dry_run
       puts 'This is a dry run for development. It will not refile any SCSB collection item.'
