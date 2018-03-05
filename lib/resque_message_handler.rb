@@ -1,46 +1,18 @@
-Dir[File.join(__dir__, '*.rb')].each {|file| require file }
-require 'nypl_log_formatter'
+require File.join(__dir__, '..', 'boot')
 
-class MessageHandler
-  VALID_ACTIONS = ['update', 'transfer']
+class ResqueMessageHandler
 
-  #  options message    [Aws::SQS::Types::Message]
-  #  options sqs_client [Class: Aws::SQS::Client]
-  #  options settings   [Hash]
   def initialize(options = {})
-    @message    = options[:message]
-    @sqs_client = options[:sqs_client]
-    @logger     = NyplLogFormatter.new(STDOUT)
-    @settings   = options[:settings]
-    @parsed_message = {}
+    @parsed_message = options[:message]
+    @settings = options[:settings]
+    @logger = Application.logger
   end
 
   def handle
-    if old_enough?
-      @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
-      @parsed_message = JSON.parse(@message.body)
-      if valid?
-        self.send(@parsed_message['action'])
-        @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
-      else
-        @logger.error("Message '#{@message.body}' contains an unsupported action")
-        @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
-      end
-    else
-      can_be_processed_at = (@message.attributes['SentTimestamp'][0..9].to_i + @settings['minimum_message_age_seconds'].to_i) - Time.now.utc.to_i
-      @logger.debug("Message '#{@message.body}' is not old enough to process. It can be processed in #{can_be_processed_at} seconds")
-    end
+    self.send(@parsed_message['action'])
   end
 
-  def valid?
-    (@parsed_message['action'] && VALID_ACTIONS.include?(@parsed_message['action']))
-  end
-
-  def old_enough?
-    seconds_since_publishing = Time.now.utc.to_i - @message.attributes['SentTimestamp'][0..9].to_i
-    (seconds_since_publishing >= @settings['minimum_message_age_seconds'].to_i)
-  end
-
+  # TODO: Add logging of results here.
   def transfer
     source_barcode_scsb_mapper = get_barcode_mapper
     source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping
@@ -162,4 +134,5 @@ class MessageHandler
     )
     mailer.send_error_email
   end
+
 end

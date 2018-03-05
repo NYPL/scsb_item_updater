@@ -1,6 +1,5 @@
+require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
-require 'json'
-require 'nypl_log_formatter'
 
 class Refiler
   include Errorable
@@ -13,10 +12,11 @@ class Refiler
     @errors = {}
     @barcodes = options[:barcodes]
     @nypl_platform_client = options[:nypl_platform_client]
-    @logger = NyplLogFormatter.new(STDOUT)
+    @logger = Application.logger
     @is_dry_run = options[:is_dry_run]
   end
 
+  # TODO: Log, don't print
   def refile!
     if @is_dry_run
       puts 'This is a dry run for development. It will not refile any SCSB collection item.'

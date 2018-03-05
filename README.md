@@ -16,8 +16,28 @@ The rough workflow for this is, per barcode:
 2.  Hit [our platform api](https://platformdocs.nypl.org/#/recap/get_v0_1_recap_nypl_bibs) with the customer code and barcode and receive back SCSBXML.
 3.  Do minor massaging and post updated information to the [SCSB "submit collection" endpoint](https://uat-recap.htcinc.com:9093/swagger-ui.html#!/shared-collection-rest-controller/submitCollection).
 
-After the updates - this app will, in some way, shape or form send an email to
-the staff who initiated the update. (Success / failure)
+## Application Architecture
+
+### High Level Workflow:
+
+This application...
+
+1.  Consumes messages from Amazon SQS.
+2.  Persists those messages into Redis, and delete them from SQS.
+3.  Works messages from Redis using [resque](https://github.com/resque/resque) in a separate process.
+
+### Details
+
+#### From SQS -> Redis
+
+1.  `dequeue_from_sqs.rb` consumes messages from SQS. It does that by instantiating an `SQSMessageHandler`.
+1.  `SQSMessageHandler` makes sure that a message is well formed & old enough to be worked.  
+If it is, it's persisted into Redis and deleted from SQS.
+
+#### Working Redis
+
+1.  `ProcessResqueMessage`, a [resque job](https://github.com/resque/resque#overview), uses an instance of `ResqueMessageHandler` do all the hard work.
+1.  `ResqueMessageHandler` is what actually inspects the message, makes the appropriate API calls (through other classes), and conditionally sends error reports.
 
 ## Installing & Running
 
@@ -25,35 +45,50 @@ the staff who initiated the update. (Success / failure)
 
 #### Setup
 
+1.  Ensure you have Redis installed & running on your machine (`brew install redis`)
 1.  `cp ./config/.env.example ./config/.env`
 1.  `gem install bundler --version 1.16.1`
 1.  `bundle install`
 
-#### Usage
+#### Running Natively Locally
 
-`ruby ./consume_messages.rb`
+1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work`
+1.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
-### Docker
+#### Running From Docker Locally
 
-#### Building a Docker Image
+You can use docker and [`docker-compose`](https://docs.docker.com/compose/overview/) to run the app locally too.
+`docker compose` will even bring up its own instance of Redis.
 
-`docker build --no-cache .`
+1.  Ensure you have correct environment variables setup in `./config/.env`
+1.  Build the docker image: `docker build --no-cache -t scsb_item_updater:latest .`
+1.  `docker compose up`
 
-#### Running from Docker build
+## Running Resque
+
+#### Debugging Resque Workers
+
+From an IRB session (`$bundle exec irb -r ./boot.rb`).
+
+This [Stack Overflow thread](http://stackoverflow.com/questions/8798357/inspect-and-retry-resque-jobs-via-redis-cli) has good tips on ways to inspect the queue.
 
 ```
-docker run -e AWS_KEY=*** \
--e AWS_SECRET=*** \
--e SQS_QUEUE_URL=*** \
--e POLLING_INTERVAL_SECONDS=*** \
-...snip
-[IMAGENAME-OR-SHA]
+> Resque.info
+  => {:pending=>0, :processed=>193, :queues=>1, :workers=>2, :working=>0, :failed=>168, :servers=>["redis://fqdn.com:6379/0"], :environment=>"development"}
+
+# Print exceptions
+> Resque::Failure.all(0,20).each { |job|
+     puts "#{job["exception"]}  #{job["backtrace"]}"
+  }
+
+# Reset the failed jobs count
+> Resque::Failure.clear
+
+# Restarting all failed jobs
+(Resque::Failure.count-1).downto(0).each do |i|
+  Resque::Failure.requeue(i)
+end
 ```
-
-_...for a complete list of environment variables see `./config/.env`_
-
-1.  `ruby consume_messages.rb`
-2.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
 ## Git Workflow & Deployment
 

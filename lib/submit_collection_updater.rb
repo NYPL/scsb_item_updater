@@ -1,6 +1,4 @@
-require 'httparty'
-require 'json'
-require 'nokogiri'
+require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
 
 class SubmitCollectionUpdater
@@ -21,7 +19,7 @@ class SubmitCollectionUpdater
     @api_key = options[:api_key]
     @is_gcd_protected = options[:is_gcd_protected] || false
     @is_dry_run = options[:is_dry_run]
-    @logger = NyplLogFormatter.new(STDOUT)
+    @logger = Application.logger
   end
 
   def update_scsb_items

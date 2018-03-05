@@ -1,4 +1,4 @@
-require 'nypl_log_formatter'
+require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
 
 class SCSBXMLFetcher
@@ -12,7 +12,7 @@ class SCSBXMLFetcher
     @errors = {}
     @nypl_platform_client = options[:nypl_platform_client]
     @barcode_to_attributes_mapping = options[:barcode_to_attributes_mapping]
-    @logger = NyplLogFormatter.new(STDOUT)
+    @logger = Application.logger
   end
 
   # returns a hash where the keys are barcodes and the values are SCSBXML Strings

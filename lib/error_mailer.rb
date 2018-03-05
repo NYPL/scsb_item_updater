@@ -1,5 +1,4 @@
-require 'mail'
-require 'erb'
+require File.join(__dir__, '..', 'boot')
 
 class ErrorMailer
   attr_reader :from_address, :cc_addresses, :mailer_domain, :mailer_username,

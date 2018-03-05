@@ -1,5 +1,4 @@
-require 'httparty'
-require 'json'
+require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
 
 class BarcodeToScsbAttributesMapper

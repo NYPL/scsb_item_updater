@@ -1,0 +1,21 @@
+version: '3'
+services:
+  redis:
+    image: redis
+  work_sqs_messages:
+    image: scsb_item_updater:latest
+    env_file: ./config/.env
+    entrypoint: ["ruby", "/app/dequeue_from_sqs.rb"]
+    environment:
+      - REDIS_DOMAIN_AND_PORT=redis:6379
+    depends_on:
+      - 'redis'
+  work_redis_messages:
+    image: scsb_item_updater:latest
+    env_file: ./config/.env
+    environment:
+      - QUEUE=*
+      - REDIS_DOMAIN_AND_PORT=redis:6379
+    entrypoint: ["rake", "resque:work"]
+    depends_on:
+      - 'redis'
