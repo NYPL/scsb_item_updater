@@ -18,6 +18,9 @@ end
 
 # Bring environment variables in ./config/.env into scope.
 # This is only used in development.
+#  * This line will no-op in production (which is good)
+#  * Since ./config/.env is in .gitignore & .dockerignore we'll never put secrets into production
+
 require 'dotenv'
 Dotenv.load(File.join('.', 'config', '.env'))
 
