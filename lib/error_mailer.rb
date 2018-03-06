@@ -59,7 +59,7 @@ class ErrorMailer
       Mail.new do
         from     error_mailer.from_address
         to       error_mailer.sqs_message['email']
-        subject  "ReCAP: Errors with a recent action"
+        subject  "ReCAP: Errors with a recent action #{Time.now}"
         # the value that cc takes is an array, so we split the environment variable with comma
         cc       error_mailer.cc_addresses.split(',')
         body     error_mailer.email_body
@@ -78,7 +78,7 @@ class ErrorMailer
         from     error_mailer.from_address
         to       error_mailer.sqs_message['email']
         # the value that cc takes is an array, so we split the environment variable with comma
-        subject  "ReCAP: Errors with a recent action"
+        subject  "ReCAP: Errors with a recent action #{Time.now}"
         cc       error_mailer.cc_addresses.split(',')
         body     error_mailer.email_body
         delivery_method (error_mailer.environment == 'test') ? :test : :logger
