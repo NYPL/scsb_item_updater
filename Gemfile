@@ -8,6 +8,7 @@ gem 'nokogiri', '~> 1.8', '>= 1.8.1'
 gem 'nypl_log_formatter', '~> 0.1.2'
 gem 'mail', '~> 2.6', '>= 2.6.3'
 gem 'resque', '~> 1.27', '>= 1.27.4'
+gem 'resque-scheduler', '~> 4.3', '>= 4.3.1'
 
 group :development, :test do
   gem 'pry',   '~> 0.11.3'
