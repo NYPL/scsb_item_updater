@@ -11,6 +11,7 @@ require 'erb'
 require 'yaml'
 require 'nypl_log_formatter'
 require 'resque'
+require 'resque-scheduler'
 
 Dir.glob('./lib/**/*.rb').each do |file|
   require file
