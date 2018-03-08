@@ -3,9 +3,15 @@ require File.join(__dir__, '..', 'boot')
 class ResqueMessageHandler
 
   def initialize(options = {})
+    # We want to smuggle the truly original message
+    # because it may be nice to talk about the original messages barcodes
+    # in an error email 30 days on.
+    @original_message = options[:original_message]
     @parsed_message = options[:message]
     @settings = options[:settings]
     @logger = Application.logger
+    @expires_at = options[:expires_at]
+    @retry_count = options[:retry_count] || 0
   end
 
   def handle
@@ -63,12 +69,37 @@ class ResqueMessageHandler
     refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
     refiler.refile!
 
-    send_errors_for([
-      mapper.errors,
-      xml_fetcher.errors,
-      submit_collection_updater.errors,
-      refiler.errors
-    ])
+    if !submit_collection_updater.errors.empty?
+      if @expires_at && @expires_at < Time.now.utc
+        Application.logger.info("Now send the error email")
+        # TODO: Stop retrying.
+        # TODO: Send the ¯\_(ツ)_/¯ - "We Tried email!"
+        return #no need to refile
+      end
+
+      # TODO: Talk with Kate about what's considered a "retry-able error"
+      # Possibly wrap this in an if-condition with that.
+      Resque.enqueue_in(
+        Application.settings['resque_retry_rate_seconds'].to_i,
+        RetriedResqueMessage,
+        {barcodes: submit_collection_updater.errors.keys,
+         original_message: @original_message || @parsed_message,
+         expires_at: @expires_at || (Time.now.utc + (86400*30)),
+         retry_count: @retry_count + 1
+       }
+      )
+    end
+
+    if @retry_count == 0
+      # TODO: The language of this message may need to change to
+      # reflect that we are going to retry for 30 days.
+      send_errors_for([
+        mapper.errors,
+        xml_fetcher.errors,
+        submit_collection_updater.errors,
+        refiler.errors
+      ])
+    end
   end
 
   private
