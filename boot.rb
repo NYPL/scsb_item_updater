@@ -12,7 +12,7 @@ require 'yaml'
 require 'nypl_log_formatter'
 require 'resque'
 
-Dir.glob('./lib/*.rb').each do |file|
+Dir.glob('./lib/**/*.rb').each do |file|
   require file
 end
 

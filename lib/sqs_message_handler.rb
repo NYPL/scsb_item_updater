@@ -1,5 +1,4 @@
 require File.join(__dir__, '..', 'boot')
-require File.join(__dir__, 'jobs', 'process_resque_message')
 
 class SQSMessageHandler
   VALID_ACTIONS = ['update', 'transfer']
