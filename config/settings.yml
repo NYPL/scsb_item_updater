@@ -10,6 +10,7 @@ nypl_oauth_url: <%= ENV['NYPL_OAUTH_URL'] %>
 nypl_oauth_secret: <%= ENV['NYPL_OAUTH_SECRET'] %>
 platform_api_url: <%= ENV['PLATFORM_API_URL'] %>
 is_dry_run:     <%= ENV['IS_DRY_RUN'] %>
+resque_retry_interval_seconds: <%= ENV['RESQUE_RETRY_INTERVAL_SECONDS'] %>
 smtp_domain:    <%= ENV['SMTP_DOMAIN'] %>
 smtp_user_name: <%= ENV['SMTP_USER_NAME'] %>
 smtp_password:  <%= ENV['SMTP_PASSWORD'] %>
