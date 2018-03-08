@@ -15,7 +15,8 @@ services:
     env_file: ./config/.env
     environment:
       - QUEUE=*
+      - LOGFORMAT=json
       - REDIS_DOMAIN_AND_PORT=redis:6379
-    entrypoint: ["rake", "resque:work"]
+    entrypoint: ["rake", "resque:work_and_schedule"]
     depends_on:
       - 'redis'

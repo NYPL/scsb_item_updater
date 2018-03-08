@@ -52,7 +52,7 @@ If it is, it's persisted into Redis and deleted from SQS.
 
 #### Running Natively Locally
 
-1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work`
+1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work_and_schedule`
 1.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
 #### Running From Docker Locally
