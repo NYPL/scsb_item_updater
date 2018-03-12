@@ -11,6 +11,9 @@ DETAILS:
 <%= barcode %>:
   <% errors.each do |error| %>
       * <%= error %>
+      <% if errror == retryable_error_message %>
+        Note: this update will be retried for up to 30 days. If it has not succeeded in that time we will send you another email informing you.
+      <% end %>
   <% end %>
 <% end %>
 

@@ -23,6 +23,7 @@ class ErrorMailer
     @sqs_message      = options[:sqs_message]
     @error_hashes     = options[:error_hashes]
     @environment      = options[:environment]
+    @retryable_error_message = ResqueMessageHandler.PARTIAL_UPDATE_ERROR_MSG
   end
 
   def send_error_email

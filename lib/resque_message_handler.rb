@@ -97,8 +97,6 @@ class ResqueMessageHandler
     end
 
     if @retry_count == 0
-      # TODO: The language of this message may need to change to
-      # reflect that we are going to retry for 30 days.
       send_errors_for([
         mapper.errors,
         xml_fetcher.errors,
