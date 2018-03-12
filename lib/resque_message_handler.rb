@@ -2,6 +2,9 @@ require File.join(__dir__, '..', 'boot')
 
 class ResqueMessageHandler
 
+  # From SCC-293
+  PARTIAL_UPDATE_ERROR_MSG = 'Rejection record - Only use restriction and cgd not updated because the item is in use'
+
   def initialize(options = {})
     # We want to smuggle the truly original message
     # because it may be nice to talk about the original messages barcodes
@@ -69,7 +72,11 @@ class ResqueMessageHandler
     refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
     refiler.refile!
 
-    if !submit_collection_updater.errors.empty?
+    retryable_error_barcodes = submit_collection_updater.errors.select { |barcode, errors|
+      errors.include? PARTIAL_UPDATE_ERROR_MSG
+    }.keys
+
+    if !retryable_error_barcodes.empty?
       if @expires_at && @expires_at < Time.now.utc
         Application.logger.info("Now send the error email")
         # TODO: Stop retrying.
@@ -77,16 +84,15 @@ class ResqueMessageHandler
         return #no need to refile
       end
 
-      # TODO: Talk with Kate about what's considered a "retry-able error"
-      # Possibly wrap this in an if-condition with that.
       Resque.enqueue_in(
         Application.settings['resque_retry_rate_seconds'].to_i,
         RetriedResqueMessage,
-        {barcodes: submit_collection_updater.errors.keys,
-         original_message: @original_message || @parsed_message,
-         expires_at: @expires_at || (Time.now.utc + (86400*30)),
-         retry_count: @retry_count + 1
-       }
+        {
+          barcodes: retryable_error_barcodes,
+          original_message: @original_message || @parsed_message,
+          expires_at: @expires_at || (Time.now.utc + (86400*30)),
+          retry_count: @retry_count + 1
+        }
       )
     end
 
