@@ -76,14 +76,10 @@ class ResqueMessageHandler
       errors.include? PARTIAL_UPDATE_ERROR_MSG
     }.keys
 
-    if !retryable_error_barcodes.empty?
-      if @expires_at && @expires_at < Time.now.utc
-        Application.logger.info("Now send the error email")
-        # TODO: Stop retrying.
-        # TODO: Send the ¯\_(ツ)_/¯ - "We Tried email!"
-        return #no need to refile
-      end
+    all_errors_retryable = (submit_collection_updater.errors.keys - retryable_error_barcodes).empty?
+    retry_limit_reached = (@retry_count == Application.settings['resque_retry_limit'])
 
+    if !retryable_error_barcodes.empty? and !retry_limit_reached
       Resque.enqueue_in(
         Application.settings['resque_retry_rate_seconds'].to_i,
         RetriedResqueMessage,
@@ -96,13 +92,20 @@ class ResqueMessageHandler
       )
     end
 
-    if @retry_count == 0
-      send_errors_for([
-        mapper.errors,
-        xml_fetcher.errors,
-        submit_collection_updater.errors,
-        refiler.errors
-      ])
+    if @retry_count == 0 or       # if first time
+        !all_errors_retryable or  # or we have some non-retryable errors
+        retry_limit_reached       # or we've hit the retry limit
+
+      send_errors_for(
+        [
+          mapper.errors,
+          xml_fetcher.errors,
+          submit_collection_updater.errors,
+          refiler.errors
+        ],
+        Time.at(original_message['SentTimestamp'].to_i),
+        retry_limit_reached
+      )
     end
   end
 
@@ -156,7 +159,7 @@ class ResqueMessageHandler
     })
   end
 
-  def send_errors_for(errors = [])
+  def send_errors_for(errors = [], submitted_datetime = nil, retry_limit_reached = false)
     mailer = ErrorMailer.new(
       error_hashes: errors,
       sqs_message: @parsed_message,
@@ -165,7 +168,9 @@ class ResqueMessageHandler
       mailer_domain: @settings['smtp_domain'],
       mailer_username: @settings['smtp_user_name'],
       mailer_password: @settings['smtp_password'],
-      environment: @settings['environment']
+      environment: @settings['environment'],
+      submitted_datetime: submitted_datetime,
+      retry_limit_reached: retry_limit_reached
     )
     mailer.send_error_email
   end

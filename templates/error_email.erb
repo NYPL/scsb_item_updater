@@ -1,6 +1,6 @@
 Hi <%= sqs_message['email'] %>
 
-There was a problem in a recent '<%= sqs_message['action'] %>' operation.
+There was a problem in a '<%= sqs_message['action'] %>' operation initiated through the SCSBuster admin app on <% submitted_datetime %>.
 Here are the details.
 
 The <%= sqs_message['barcodes'].length %> barcode(s) that were attempted to be altered were: <%= sqs_message['barcodes'].join(',') %>.
@@ -11,7 +11,7 @@ DETAILS:
 <%= barcode %>:
   <% errors.each do |error| %>
       * <%= error %>
-      <% if errror == retryable_error_message %>
+      <% if error == retryable_error_message %>
         Note: this update will be retried for up to 30 days. If it has not succeeded in that time we will send you another email informing you.
       <% end %>
   <% end %>

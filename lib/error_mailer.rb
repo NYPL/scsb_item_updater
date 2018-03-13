@@ -2,7 +2,7 @@ require File.join(__dir__, '..', 'boot')
 
 class ErrorMailer
   attr_reader :from_address, :cc_addresses, :mailer_domain, :mailer_username,
-    :mailer_password, :sqs_message, :environment
+    :mailer_password, :sqs_message, :environment, :submitted_datetime, :retryable_error_message
 
   #  options :from_address    [String]
   #  options :cc_addresses    [String]
@@ -12,6 +12,8 @@ class ErrorMailer
   #  options :error_hashes    [Array]
   #  options :sqs_message     [Hash]
   #   a JSON.parse()ed copy of the an SQS message's body
+  #  options :submitted_datetime [Time]
+  #  options :retry_limit_reached [Boolean]
   def initialize(options = {})
     default_options = {error_hashes: [], sqs_message: {}}
     options = default_options.merge(options)
@@ -23,7 +25,9 @@ class ErrorMailer
     @sqs_message      = options[:sqs_message]
     @error_hashes     = options[:error_hashes]
     @environment      = options[:environment]
-    @retryable_error_message = ResqueMessageHandler.PARTIAL_UPDATE_ERROR_MSG
+    @submitted_datetime = options[:submitted_datetime]
+    @retry_limit_reached = options[:retry_limit_reached]
+    @retryable_error_message = ResqueMessageHandler::PARTIAL_UPDATE_ERROR_MSG
   end
 
   def send_error_email
@@ -48,7 +52,8 @@ class ErrorMailer
   end
 
   def email_body
-    template = File.read(File.join(__dir__, '..', 'templates', 'error_email.erb'))
+    template_name = @retry_limit_reached ? 'max_retries_error_email.erb' : 'error_email.erb'
+    template = File.read(File.join(__dir__, '..', 'templates', template_name))
     renderer = ERB.new(template)
     renderer.result(binding)
   end
