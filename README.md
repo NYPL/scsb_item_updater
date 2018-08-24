@@ -72,7 +72,7 @@ From an IRB session (`$bundle exec irb -r ./boot.rb`).
 
 This [Stack Overflow thread](http://stackoverflow.com/questions/8798357/inspect-and-retry-resque-jobs-via-redis-cli) has good tips on ways to inspect the queue.
 
-```
+```ruby
 > Resque.info
   => {:pending=>0, :processed=>193, :queues=>1, :workers=>2, :working=>0, :failed=>168, :servers=>["redis://fqdn.com:6379/0"], :environment=>"development"}
 
