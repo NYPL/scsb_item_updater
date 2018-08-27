@@ -1,5 +1,6 @@
 require File.join(__dir__, '..', 'boot')
 require File.join('.', 'lib', 'errorable')
+require 'securerandom'
 
 class ItemTransferer
   include Errorable
@@ -46,15 +47,17 @@ class ItemTransferer
   #
   def request_body(item_attributes)
     body = {
-     "holdingTransfers": [
+     "itemTransfers": [
        {
          "source": {
            "owningInstitutionBibId": item_attributes['owningInstitutionBibId'],
-           "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId']
+           "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId'],
+           "owningInstitutionItemId": item_attributes['owningInstitutionItemId']
          },
          "destination": {
            "owningInstitutionBibId": bib_with_leading_dot,
-           "owningInstitutionHoldingsId": item_attributes['owningInstitutionHoldingsId']
+           "owningInstitutionHoldingsId": "#{bib_with_leading_dot}-#{SecureRandom.uuid}",
+           "owningInstitutionItemId": item_attributes['owningInstitutionItemId']
          }
        }
      ],

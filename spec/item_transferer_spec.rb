@@ -3,10 +3,19 @@ require 'spec_helper'
 describe ItemTransferer do
   before do
     @request_body = {
-      'holdingTransfers' =>
+      'itemTransfers' =>
       [
-        {'source'       => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'},
-         'destination' =>  {'owningInstitutionBibId' => '.destinationBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}}
+        {'source'       => {
+          'owningInstitutionBibId' => 'aBibId',
+          'owningInstitutionHoldingsId' => 'aHoldingsId',
+          'owningInstitutionItemId' => 'anItemId'
+        },
+         'destination' =>  {
+           'owningInstitutionBibId' => '.destinationBibId',
+           'owningInstitutionHoldingsId' => '.destinationBibId-ABC-123',
+           'owningInstitutionItemId' => 'anItemId'
+         }
+        }
       ],
       "institution" => "NYPL"
     }
@@ -14,7 +23,7 @@ describe ItemTransferer do
     @item_transferer = ItemTransferer.new(
      api_key: 'fake_key',
      api_url: "http://example.com",
-     barcode_to_attributes_mapping: {'1234' => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId'}},
+     barcode_to_attributes_mapping: {'1234' => {'owningInstitutionBibId' => 'aBibId', 'owningInstitutionHoldingsId' => 'aHoldingsId', 'owningInstitutionItemId' => 'anItemId'}},
      destination_bib_id: "destinationBibId"
    )
 
@@ -22,6 +31,8 @@ describe ItemTransferer do
 
   describe 'making calls' do
     it 'hits SCSB with the appropriate headers & body' do
+      expect(SecureRandom).to receive(:uuid).at_least(:once).and_return('ABC-123')
+
       expect(HTTParty).to receive(:post).with(
         "http://example.com/sharedCollection/transferHoldingsAndItems",
         headers: {
@@ -44,6 +55,7 @@ describe ItemTransferer do
     end
 
     it "parrots the 'error' message from SCSB's response if it exists" do
+      expect(SecureRandom).to receive(:uuid).at_least(:once).and_return('ABC-123')
       fake_api_response = double(body: JSON.generate({message: "Failed", holdingTransferResponses: [{"message": "Source holdings is not under source bib"}]}))
       expect(HTTParty).to receive(:post).with(
         "http://example.com/sharedCollection/transferHoldingsAndItems",
