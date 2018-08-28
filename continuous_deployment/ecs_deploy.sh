@@ -2,7 +2,7 @@
 # Deploy only if it's not a pull request
 if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
   # Deploy only if we're testing the master branch
-  if [ "$TRAVIS_BRANCH" == "development" ] || [ "$TRAVIS_BRANCH" == "production" ]; then
+  if [ "$TRAVIS_BRANCH" == "development" ] || [ "$TRAVIS_BRANCH" == "qa" ] || [ "$TRAVIS_BRANCH" == "production" ]; then
 
     case "$TRAVIS_BRANCH" in
       production)
@@ -10,6 +10,12 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
         AWS_SECRET_ACCESS_KEY=$aws_secret_access_key_production
         CLUSTER_NAME=$CLUSTER_NAME_PRODUCTION
         SERVICE_NAME=$SERVICE_NAME_PRODUCTION
+        ;;
+      qa)
+        AWS_ACCESS_KEY_ID=$aws_access_key_id_production
+        AWS_SECRET_ACCESS_KEY=$aws_secret_access_key_production
+        CLUSTER_NAME=$CLUSTER_NAME_QA
+        SERVICE_NAME=$SERVICE_NAME_QA
         ;;
       *)
         AWS_ACCESS_KEY_ID=$aws_access_key_id_development
