@@ -4,6 +4,7 @@
 |:--------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `master`      | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=master)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)      |
 | `development` | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=development)](https://travis-ci.org/NYPL-discovery/scsb_item_updater) |
+| `qa`          | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=qa)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)          |
 | `production`  | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=production)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)  |
 
 This app consumes messages produced by [NYPL/nypl-recap-admin](https://github.com/NYPL/nypl-recap-admin).  
