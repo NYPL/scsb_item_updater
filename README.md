@@ -95,11 +95,12 @@ end
 
 Our branches (in order or stability are):
 
-| Branch      | Environment | AWS Account     |
-|:------------|:------------|:----------------|
-| master      | none        | none            |
-| development | development | aws-sandbox     |
-| production  | production  | aws-digital-dev |
+| Branch      | Environment | AWS Account      |
+|:------------|:------------|:-----------------|
+| master      | none        | none             |
+| development | development | nypl-sandbox     |
+| qa          | qa          | nypl-digital-dev |
+| production  | production  | nypl-digital-dev |
 
 ### Cutting A Feature Branch
 
