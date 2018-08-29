@@ -4,6 +4,7 @@
 |:--------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `master`      | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=master)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)      |
 | `development` | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=development)](https://travis-ci.org/NYPL-discovery/scsb_item_updater) |
+| `qa`          | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=qa)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)          |
 | `production`  | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=production)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)  |
 
 This app consumes messages produced by [NYPL/nypl-recap-admin](https://github.com/NYPL/nypl-recap-admin).  
@@ -72,7 +73,7 @@ From an IRB session (`$bundle exec irb -r ./boot.rb`).
 
 This [Stack Overflow thread](http://stackoverflow.com/questions/8798357/inspect-and-retry-resque-jobs-via-redis-cli) has good tips on ways to inspect the queue.
 
-```
+```ruby
 > Resque.info
   => {:pending=>0, :processed=>193, :queues=>1, :workers=>2, :working=>0, :failed=>168, :servers=>["redis://fqdn.com:6379/0"], :environment=>"development"}
 
@@ -94,11 +95,12 @@ end
 
 Our branches (in order or stability are):
 
-| Branch      | Environment | AWS Account     |
-|:------------|:------------|:----------------|
-| master      | none        | none            |
-| development | development | aws-sandbox     |
-| production  | production  | aws-digital-dev |
+| Branch      | Environment | AWS Account      |
+|:------------|:------------|:-----------------|
+| master      | none        | none             |
+| development | development | nypl-sandbox     |
+| qa          | qa          | nypl-digital-dev |
+| production  | production  | nypl-digital-dev |
 
 ### Cutting A Feature Branch
 
