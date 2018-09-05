@@ -58,8 +58,8 @@ class ErrorMailer
     if @environment == 'production'
       Mail.new do
         from     error_mailer.from_address
-        to       error_mailer.sqs_message['email']
-        subject  "ReCAP: Errors with a recent action #{Time.now}"
+        to       error_mailer.sqs_message['user_email']
+        subject  "ReCAP: Errors with a recent #{error_mailer.sqs_message['action']} at #{Time.now}"
         # the value that cc takes is an array, so we split the environment variable with comma
         cc       error_mailer.cc_addresses.split(',')
         body     error_mailer.email_body
@@ -76,9 +76,9 @@ class ErrorMailer
     else
       Mail.new do
         from     error_mailer.from_address
-        to       error_mailer.sqs_message['email']
+        to       error_mailer.sqs_message['user_email']
         # the value that cc takes is an array, so we split the environment variable with comma
-        subject  "ReCAP: Errors with a recent action #{Time.now}"
+        subject  "ReCAP: Errors with a recent #{error_mailer.sqs_message['action']} at #{Time.now}"
         cc       error_mailer.cc_addresses.split(',')
         body     error_mailer.email_body
         delivery_method (error_mailer.environment == 'test') ? :test : :logger
