@@ -1,4 +1,4 @@
-Hi <%= sqs_message['email'] %>
+Hi <%= sqs_message['user_email'] %>
 
 SCSBuster was unable to process the following barcode(s):
 <%= sqs_message['barcodes'].join(',') %>.
