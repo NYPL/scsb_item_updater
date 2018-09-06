@@ -53,7 +53,7 @@ private
 
     # We're done iterating. Add requested, but unfound barcodes to errors hash
     result.find_all {|barcode, attributes_hash| attributes_hash.values.all?(&:nil?) }.each do |barcode, customer_code|
-      add_or_append_to_errors(barcode, "Could not found in SCSB's search API")
+      add_or_append_to_errors(barcode, "could not be found in SCSB's search API")
     end
 
     # Return the massaged value
@@ -90,7 +90,7 @@ private
       end
 
     rescue Exception => e
-      barcodes.each { |barcode| add_or_append_to_errors(barcode, "Bad response from SCSB API") }
+      barcodes.each { |barcode| add_or_append_to_errors(barcode, "received a bad response from SCSB API") }
       {}
     end
   end

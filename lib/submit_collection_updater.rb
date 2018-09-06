@@ -30,7 +30,7 @@ class SubmitCollectionUpdater
       @barcode_to_scsb_xml_mapping.each do |barcode, scsb_xml|
         # it stops calling the API to update the record if no valid XML
         if scsb_xml.empty?
-          add_or_append_to_errors(barcode, 'Not have valid SCSB XML. Stops submitting this record')
+          add_or_append_to_errors(barcode, 'did not not have valid SCSB XML, which will prevent record being submitted')
           @logger.error("No valid XML for the barcode: #{barcode}. It has stopped updating the record.")
         else
           update_item(barcode, scsb_xml)
@@ -63,7 +63,7 @@ private
       puts "sent barcode #{barcode} to submitCollection. The response was #{response.body}"
     rescue Exception => e
       # TODO: log...
-      add_or_append_to_errors(barcode, 'Bad response from SCSB /sharedCollection/submitCollection API')
+      add_or_append_to_errors(barcode, 'received a bad response from SCSB /sharedCollection/submitCollection API')
     end
   end
 
