@@ -34,7 +34,7 @@ class Refiler
 
           puts "#{barcode} refiling completed"
         rescue Exception => e
-          add_or_append_to_errors(barcode, 'Bad response from NYPL refile API')
+          add_or_append_to_errors(barcode, 'received a bad response from the NYPL refile API')
         end
       end
     end

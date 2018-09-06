@@ -15,7 +15,7 @@ describe BarcodeToScsbAttributesMapper do
     it "contains an error if there's an error with the connection to searchService" do
       expect(HTTParty).to receive(:post).at_least(:once).and_return("This is nonsense")
       @barcode_mapper.barcode_to_attributes_mapping
-      error_message = 'Bad response from SCSB API'
+      error_message = 'received a bad response from SCSB API'
       expect(@barcode_mapper.errors['1234']).to include(error_message)
       expect(@barcode_mapper.errors['5678']).to include(error_message)
     end
@@ -30,7 +30,7 @@ describe BarcodeToScsbAttributesMapper do
       expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
 
       @barcode_mapper.barcode_to_attributes_mapping
-      expect(@barcode_mapper.errors).to eq({'5678' => ["Could not found in SCSB's search API"]})
+      expect(@barcode_mapper.errors).to eq({'5678' => ["could not be found in SCSB's search API"]})
     end
 
   end

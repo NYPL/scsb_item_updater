@@ -18,7 +18,7 @@ describe SubmitCollectionUpdater do
     it "contains an error if there's an error with the connection to /sharedCollection/submitCollection" do
       expect(HTTParty).to receive(:post).at_least(:once).and_raise("an exception")
       @submit_collection_updater.update_scsb_items
-      expect(@submit_collection_updater.errors).to eq({'1234' => ["Bad response from SCSB /sharedCollection/submitCollection API"]})
+      expect(@submit_collection_updater.errors).to eq({'1234' => ["received a bad response from SCSB /sharedCollection/submitCollection API"]})
     end
 
     it "parrots the 'error' message from SCSB's response if it exists" do
@@ -73,7 +73,7 @@ describe SubmitCollectionUpdater do
 
       updater.update_scsb_items
 
-      error_message = 'Not have valid SCSB XML. Stops submitting this record'
+      error_message = 'did not not have valid SCSB XML, which will prevent record being submitted'
       expect(updater.errors['456']).to include(error_message)
     end
   end
