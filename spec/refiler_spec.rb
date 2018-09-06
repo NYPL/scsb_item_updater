@@ -24,7 +24,7 @@ describe Refiler do
     it 'contains an error if there\'s an error with the connection to NYPL\'s Refile endpoint' do
       expect(@nypl_platform_client).to receive(:refile).at_least(:once).and_raise('an exception')
       @refiler.refile!
-      error_message = 'Bad response from NYPL refile API'
+      error_message = 'received a bad response from the Sierra refile API'
       expect(@refiler.errors['1234']).to include(error_message)
     end
 

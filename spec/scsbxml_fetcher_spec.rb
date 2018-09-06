@@ -17,14 +17,14 @@ describe SCSBXMLFetcher do
     it "contains an error if there's an error with the connection to NYPL Bibs" do
       expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once).and_raise('an exception')
       @fetcher.translate_to_scsb_xml
-      error_message = 'Bad response from NYPL Bibs API'
+      error_message = 'received a bad response from NYPL Bibs API'
       expect(@fetcher.errors['1234']).to include(error_message)
     end
 
     it 'contains an error if the barcode does not have a valid customer code' do
       expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once).and_raise('an exception')
       @fetcher.translate_to_scsb_xml
-      error_message = 'Not have valid customer code'
+      error_message = 'did not have a valid customer code'
       expect(@fetcher.errors['5678']).to include(error_message)
     end
 
@@ -32,7 +32,7 @@ describe SCSBXMLFetcher do
       expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once).and_return(double(code: 500))
 
       @fetcher.translate_to_scsb_xml
-      error_message = 'Not have valid SCSB XML'
+      error_message = 'did not have valid SCSB XML'
       expect(@fetcher.errors['1234']).to include(error_message)
     end
   end
@@ -50,7 +50,7 @@ describe SCSBXMLFetcher do
     it 'maps a hash of barcodes => customer_code to a hash of barcodes and the values are SCSBXML Strings' do
       expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once).and_return(@fake_nypl_bibs_response)
       expect(@fetcher.translate_to_scsb_xml).to eq('1234' => '<?xml version=\"1.0\" ?><bibRecords></bibRecords>')
-      expect(@fetcher.errors['5678']).to eq(['Not have valid customer code'])
+      expect(@fetcher.errors['5678']).to eq(['did not have a valid customer code'])
     end
   end
 end
