@@ -29,6 +29,7 @@ class Refiler
           response = @nypl_platform_client.refile(barcode)
 
           if response.code >= 400
+            @logger.warn("problem response from platform refile call for barcode #{barcode}: #{JSON.parse(response.body)['message']}")
             add_or_append_to_errors(barcode, JSON.parse(response.body)['message'])
           end
 

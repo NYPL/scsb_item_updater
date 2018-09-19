@@ -57,6 +57,7 @@ private
       parsed_body = JSON.parse(response.body)
 
       if parsed_body[0] && parsed_body[0]['message'] && !parsed_body[0]['message'].downcase.include?('success')
+        @logger.warn("problem response from SCSB submitCollection for barcode #{barcode}: #{parsed_body[0]['message']}")
         add_or_append_to_errors(barcode, parsed_body[0]['message'])
       end
 
