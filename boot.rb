@@ -3,7 +3,7 @@
 #  * requires all the files used in the app
 #  * Creates a basic Application class, a global that is available to anything that `require`s boot.rb
 require 'json'
-require 'aws-sdk'
+require 'aws-sdk-sqs'
 require 'httparty'
 require 'nokogiri'
 require 'mail'
