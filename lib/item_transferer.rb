@@ -29,7 +29,7 @@ class ItemTransferer
         end
       rescue Exception => e
         # TODO: log...
-        add_or_append_to_errors(barcode, "error connecting to transferHoldingsAndItems: #{e.message}")
+        add_or_append_to_errors(barcode, "error in making request to transferHoldingsAndItems: #{e.message}")
       end
     end
   end

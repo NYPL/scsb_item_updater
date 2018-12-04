@@ -76,7 +76,7 @@ describe ItemTransferer do
       expect(HTTParty).to receive(:post).and_raise(Exception)
       item_transferer = ItemTransferer.new(barcode_to_attributes_mapping: {"1234" => {}})
       item_transferer.transfer!
-      expect(item_transferer.errors).to eq({"1234" => ["error connecting to transferHoldingsAndItems: Exception"]})
+      expect(item_transferer.errors).to eq({"1234" => ["error in making request to transferHoldingsAndItems: Exception"]})
     end
   end
 end
