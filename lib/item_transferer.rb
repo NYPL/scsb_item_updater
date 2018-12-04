@@ -25,11 +25,11 @@ class ItemTransferer
 
         parsed_body = JSON.parse(response.body)
         if parsed_body["message"] != "Success"
-          add_or_append_to_errors(barcode, parsed_body['holdingTransferResponses'][0]['message'])
+          add_or_append_to_errors(barcode, parsed_body['itemTransferResponses'][0]['message'])
         end
       rescue Exception => e
         # TODO: log...
-        add_or_append_to_errors(barcode, 'error connecting to transferHoldingsAndItems')
+        add_or_append_to_errors(barcode, "error in making request to transferHoldingsAndItems: #{e.message}")
       end
     end
   end
