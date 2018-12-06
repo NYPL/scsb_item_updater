@@ -73,5 +73,106 @@ describe BarcodeToScsbAttributesMapper do
       barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['this-wont-be-there'])
       expect(barcode_mapper.barcode_to_attributes_mapping['this-wont-be-there']).to eq(@very_empty_response)
     end
+
+    it "handles result sets where all relevant data is in searchItemResultRows" do
+      fake_scsb_response = double()
+      allow(fake_scsb_response).to receive(:body) { 
+        JSON.generate({
+          searchResultRows: [{
+            barcode: nil, 
+            customerCode: nil,
+            searchItemResultRows: [{
+              barcode: '1234', 
+              customerCode: 'NA',
+              owningInstitutionHoldingsId: 'holdsings_id_1',
+              owningInstitutionItemId: 'item_id_1',
+              owningInstitutionBibId: 'bib_id_1',
+            }]
+          }],
+          totalPageCount: 1
+        })
+      }
+      expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
+
+      barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['1234'])
+      expect(barcode_mapper.barcode_to_attributes_mapping['1234']).to eq(
+        {
+          'customerCode' => 'NA',
+          'barcode' => '1234',
+          'owningInstitutionHoldingsId' => 'holdsings_id_1',
+          'owningInstitutionItemId' => 'item_id_1',
+          'owningInstitutionBibId' => 'bib_id_1',
+        }
+      )
+
+    end
+
+    it "handles result sets where bib and item data are spread through result set" do
+      fake_scsb_response = double()
+      allow(fake_scsb_response).to receive(:body) { 
+        JSON.generate({
+          searchResultRows: [{
+            barcode: nil, 
+            customerCode: nil,
+            owningInstitutionBibId: 'bib_id_2',
+            searchItemResultRows: [{
+              barcode: '1234', 
+              customerCode: 'NA',
+              owningInstitutionHoldingsId: 'holdsings_id_1',
+              owningInstitutionItemId: 'item_id_1',
+            }]
+          }],
+          totalPageCount: 1
+        })
+      }
+      expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
+
+      barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['1234'])
+      expect(barcode_mapper.barcode_to_attributes_mapping['1234']).to eq(
+        {
+          'customerCode' => 'NA',
+          'barcode' => '1234',
+          'owningInstitutionHoldingsId' => 'holdsings_id_1',
+          'owningInstitutionItemId' => 'item_id_1',
+          'owningInstitutionBibId' => 'bib_id_2',
+        }
+      )
+
+    end
+
+    it "takes the item-level data over the bib-level data if both are available" do
+      fake_scsb_response = double()
+      allow(fake_scsb_response).to receive(:body) { 
+        JSON.generate({
+          searchResultRows: [{
+            barcode: nil, 
+            customerCode: nil,
+            owningInstitutionBibId: 'bib_id_2',
+            searchItemResultRows: [{
+              barcode: '1234', 
+              customerCode: 'NA',
+              owningInstitutionHoldingsId: 'holdsings_id_1',
+              owningInstitutionItemId: 'item_id_1',
+              owningInstitutionBibId: 'bib_id_1',
+            }]
+          }],
+          totalPageCount: 1
+        })
+      }
+      expect(HTTParty).to receive(:post).at_least(:once).and_return(fake_scsb_response)
+
+      barcode_mapper = BarcodeToScsbAttributesMapper.new(barcodes: ['1234'])
+      expect(barcode_mapper.barcode_to_attributes_mapping['1234']).to eq(
+        {
+          'customerCode' => 'NA',
+          'barcode' => '1234',
+          'owningInstitutionHoldingsId' => 'holdsings_id_1',
+          'owningInstitutionItemId' => 'item_id_1',
+          'owningInstitutionBibId' => 'bib_id_1',
+        }
+      )
+
+    end
+
   end
 end
