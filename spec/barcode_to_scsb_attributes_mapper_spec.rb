@@ -86,7 +86,7 @@ describe BarcodeToScsbAttributesMapper do
               customerCode: 'NA',
               owningInstitutionHoldingsId: 'holdsings_id_1',
               owningInstitutionItemId: 'item_id_1',
-              owningInstitutionBibId: 'bib_id_1',
+              owningInstitutionBibId: 'bib_id_from_item_data',
             }]
           }],
           totalPageCount: 1
@@ -101,7 +101,7 @@ describe BarcodeToScsbAttributesMapper do
           'barcode' => '1234',
           'owningInstitutionHoldingsId' => 'holdsings_id_1',
           'owningInstitutionItemId' => 'item_id_1',
-          'owningInstitutionBibId' => 'bib_id_1',
+          'owningInstitutionBibId' => 'bib_id_from_item_data',
         }
       )
 
@@ -114,7 +114,7 @@ describe BarcodeToScsbAttributesMapper do
           searchResultRows: [{
             barcode: nil, 
             customerCode: nil,
-            owningInstitutionBibId: 'bib_id_2',
+            owningInstitutionBibId: 'bib_id_from_bib_data',
             searchItemResultRows: [{
               barcode: '1234', 
               customerCode: 'NA',
@@ -134,7 +134,7 @@ describe BarcodeToScsbAttributesMapper do
           'barcode' => '1234',
           'owningInstitutionHoldingsId' => 'holdsings_id_1',
           'owningInstitutionItemId' => 'item_id_1',
-          'owningInstitutionBibId' => 'bib_id_2',
+          'owningInstitutionBibId' => 'bib_id_from_bib_data',
         }
       )
 
@@ -147,13 +147,13 @@ describe BarcodeToScsbAttributesMapper do
           searchResultRows: [{
             barcode: nil, 
             customerCode: nil,
-            owningInstitutionBibId: 'bib_id_2',
+            owningInstitutionBibId: 'bib_id_from_bib_data',
             searchItemResultRows: [{
               barcode: '1234', 
               customerCode: 'NA',
               owningInstitutionHoldingsId: 'holdsings_id_1',
               owningInstitutionItemId: 'item_id_1',
-              owningInstitutionBibId: 'bib_id_1',
+              owningInstitutionBibId: 'bib_id_from_item_data',
             }]
           }],
           totalPageCount: 1
@@ -168,7 +168,7 @@ describe BarcodeToScsbAttributesMapper do
           'barcode' => '1234',
           'owningInstitutionHoldingsId' => 'holdsings_id_1',
           'owningInstitutionItemId' => 'item_id_1',
-          'owningInstitutionBibId' => 'bib_id_1',
+          'owningInstitutionBibId' => 'bib_id_from_item_data',
         }
       )
 
