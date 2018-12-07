@@ -63,7 +63,7 @@ private
 
       puts "sent barcode #{barcode} to submitCollection. The response was #{response.body}"
     rescue Exception => e
-      # TODO: log...
+      @logger.error("Barcode #{barcode} received a bad response from SCSB /sharedCollection/submitCollection API: #{e.message}")
       add_or_append_to_errors(barcode, 'received a bad response from SCSB /sharedCollection/submitCollection API')
     end
   end

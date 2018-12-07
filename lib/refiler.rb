@@ -35,6 +35,7 @@ class Refiler
 
           puts "#{barcode} refiling completed"
         rescue Exception => e
+          @logger.error("Barcode #{barcode} received a bad response from the NYPL refile API: #{e.message}")
           add_or_append_to_errors(barcode, 'received a bad response from the NYPL refile API')
         end
       end
