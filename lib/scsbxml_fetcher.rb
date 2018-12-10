@@ -31,7 +31,8 @@ class SCSBXMLFetcher
             results[barcode] = response.body
           end
         rescue Exception => e
-          add_or_append_to_errors(barcode, 'received a bad response from NYPL Bibs API')
+          @logger.error("Barcode #{barcode} received a bad response from NYPL Bibs API: #{e.message}")
+          add_or_append_to_errors(barcode, "received a bad response from NYPL Bibs API")
         end
       else
         @logger.error("No valid customer code for the barcode: #{barcode}.")
