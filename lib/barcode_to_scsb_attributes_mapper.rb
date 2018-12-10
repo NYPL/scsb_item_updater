@@ -50,7 +50,6 @@ private
     result = results.inject({}) do |product, result_hash|
       product.merge(result_hash)
     end
-
     # We're done iterating. Add requested, but unfound barcodes to errors hash
     result.find_all {|barcode, attributes_hash| attributes_hash.values.all?(&:nil?) }.each do |barcode, customer_code|
       add_or_append_to_errors(barcode, "could not be found in SCSB's search API")
@@ -66,20 +65,7 @@ private
       parsed_body = JSON.parse(response.body)
 
       parsed_body['searchResultRows'].each do |result_row|
-        # guard against the off-chance SCSB returns barcode that wasn't requested
-        if @barcodes.include? result_row['barcode']
-          result[result_row['barcode']] = result_row
-        end
-
-        # https://jira.nypl.org/browse/SCC-310 describes a case where in some cases, the top-level
-        # barcode & customerCode are null and we must descend into the `searchItemResultRows` Array
-        if result_row['barcode'].nil?
-          result_row['searchItemResultRows'].each do |item_result_row|
-            if @barcodes.include? item_result_row['barcode']
-              result[item_result_row['barcode']] = item_result_row
-            end
-          end
-        end
+        process_row_to_result(result_row, result)
       end
 
       # parsed_body['totalPageCount']-1 because SCSB's pageSize params seems to be 0-indexed
@@ -92,6 +78,26 @@ private
     rescue Exception => e
       barcodes.each { |barcode| add_or_append_to_errors(barcode, "received a bad response from SCSB API") }
       {}
+    end
+  end
+
+  def process_row_to_result(row, result)
+    # guard against the off-chance SCSB returns barcode that wasn't requested
+    if @barcodes.include? row['barcode']
+      result[row['barcode']] = row
+    end
+
+    # https://jira.nypl.org/browse/SCC-310 describes a case where in some cases, the top-level
+    # barcode & customerCode are null and we must descend into the `searchItemResultRows` Array
+    if row['barcode'].nil? or row['barcode'].empty?
+      # additionally from SCC-1261, sometimes searchItemResultRows do not contain source bibId, 
+      # so grab default value from the bib data
+      default_bib_level_data = {'owningInstitutionBibId' => row['owningInstitutionBibId']} 
+      row['searchItemResultRows'].each do |item_result_row|
+        if @barcodes.include? item_result_row['barcode']
+          result[item_result_row['barcode']] = default_bib_level_data.merge(item_result_row)
+        end
+      end
     end
   end
 
