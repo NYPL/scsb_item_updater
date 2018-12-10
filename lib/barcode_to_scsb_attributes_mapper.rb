@@ -89,7 +89,7 @@ private
 
     # https://jira.nypl.org/browse/SCC-310 describes a case where in some cases, the top-level
     # barcode & customerCode are null and we must descend into the `searchItemResultRows` Array
-    if row['barcode'].nil?
+    if row['barcode'].blank?
       # additionally from SCC-1261, sometimes searchItemResultRows do not contain source bibId, 
       # so grab default value from the bib data
       default_bib_level_data = {'owningInstitutionBibId' => row['owningInstitutionBibId']} 
