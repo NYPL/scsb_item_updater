@@ -29,10 +29,11 @@ describe SCSBXMLFetcher do
     end
 
     it 'contains an error if the response does not returns a valid XML' do
-      expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once).and_return(double(code: 500))
+      expect(@nypl_platform_client).to receive(:fetch_scsbxml_for).at_least(:once)
+      .and_return(double(code: 500, parsed_response: { "error" => "SCSB XML Formatter determined that no items were suitable for export to Recap." }))
 
       @fetcher.translate_to_scsb_xml
-      error_message = 'did not have valid SCSB XML'
+      error_message = 'did not have valid SCSB XML. SCSB XML Formatter determined that no items were suitable for export to Recap.'
       expect(@fetcher.errors['1234']).to include(error_message)
     end
   end
