@@ -11,6 +11,7 @@ class ItemTransferer
     @api_url = options[:api_url]
     @barcode_to_attributes_mapping = options[:barcode_to_attributes_mapping]
     @destination_bib_id = options[:destination_bib_id]
+    @logger = Application.logger
     @errors = {}
   end
 
@@ -28,8 +29,8 @@ class ItemTransferer
           add_or_append_to_errors(barcode, parsed_body['itemTransferResponses'][0]['message'])
         end
       rescue Exception => e
-        # TODO: log...
-        add_or_append_to_errors(barcode, "error in making request to transferHoldingsAndItems: #{e.message}")
+        @logger.error("error in making request to transferHoldingsAndItems: #{e.message}")
+        add_or_append_to_errors(barcode, "error in making request to transferHoldingsAndItems")
       end
     end
   end
