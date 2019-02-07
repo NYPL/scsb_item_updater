@@ -33,7 +33,7 @@ describe SCSBXMLFetcher do
       .and_return(double(code: 500, parsed_response: { "error" => "SCSB XML Formatter determined that no items were suitable for export to Recap" }))
 
       @fetcher.translate_to_scsb_xml
-      error_message = 'did not have valid SCSB XML. SCSB XML Formatter determined that no items were suitable for export to Recap.'
+      error_message = 'did not have valid SCSB XML. This was because SCSB XML Formatter determined that no items were suitable for export to Recap.'
       expect(@fetcher.errors['1234']).to include(error_message)
     end
   end
