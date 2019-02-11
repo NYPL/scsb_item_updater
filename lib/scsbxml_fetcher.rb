@@ -28,9 +28,10 @@ class SCSBXMLFetcher
             @logger.error("No valid SCSB XML from NYPL-Bibs for the barcode: #{barcode}.")
 
             if response.parsed_response['error']
+              response.parsed_response['error'][0] = response.parsed_response['error'][0].downcase
               error_message_from_response = " This was because #{response.parsed_response['error']}."
             else
-              error_message_from_response = " This was because of undefined error."
+              error_message_from_response = " This was because of an undefined error."
             end
 
             add_or_append_to_errors(barcode, "did not have valid SCSB XML.#{error_message_from_response}")
