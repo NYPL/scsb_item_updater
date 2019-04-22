@@ -16,9 +16,9 @@ class SQSMessageHandler
   end
 
   def handle
-    if old_enough?
+    @parsed_message = JSON.parse(@message.body)
+    if old_enough? || process_immediately?
       @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
-      @parsed_message = JSON.parse(@message.body)
       if valid?
         Resque.enqueue(ProcessResqueMessage, @message.body)
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
@@ -34,6 +34,14 @@ class SQSMessageHandler
 
   def valid?
     (@parsed_message['action'] && VALID_ACTIONS.include?(@parsed_message['action']))
+  end
+
+  # Checks parsed message for conditions that obligate processing immediately
+  # (i.e. without waiting for minimum_message_age_seconds)
+  def process_immediately?
+    process_immediately = @parsed_message['source'] == 'bib-item-store-update'
+    @logger.debug("Message '#{@message.body}' appears to be triggered by an organic update from bib/item store; Process immediately") if process_immediately
+    process_immediately
   end
 
   def old_enough?
