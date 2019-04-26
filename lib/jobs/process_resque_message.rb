@@ -40,7 +40,7 @@ class ProcessResqueMessage
     end
   end
 
-  # Return last sync time (in ms since epoc)
+  # Return last sync time (in ms since epoch)
   def self.last_sync_time (barcode)
     @@sync_times[barcode]
   end
@@ -60,20 +60,14 @@ class ProcessResqueMessage
     # If size of hash is below max, noop:
     return if @@sync_times.keys.size <= MAX_SYNC_TIMES_REMEMBERED
 
-    # Determine number to remove:
-    num_to_remove = @@sync_times.keys.size - MAX_SYNC_TIMES_REMEMBERED
-    # Let's remove 10% more than required to reduce how often we have to do this:
-    num_to_remove += (MAX_SYNC_TIMES_REMEMBERED * 0.1).to_i
+    # Determine number to remove.
+    # Let's reduce hash to 90% of max to limit how often we have to do this:
+    num_to_keep = 0.9 * MAX_SYNC_TIMES_REMEMBERED
 
-    # Map barcodes to barcode-synctime pairs:
-    barcodes_to_remove = @@sync_times.keys
-      .map { |k| [k, @@sync_times[k]] }
-      .sort_by { |entry| entry.last } # Sort by sync time
-      .slice(0, num_to_remove) # Truncate
-      .map { |entry| entry.first } # Map back to barcode
-
-    # Remove by barcode:
-    barcodes_to_remove.each { |barcode| @@sync_times.delete(barcode) }
+    @@sync_times = @@sync_times
+      .sort_by { |barcode, time| -time } # Sort barcodes by time DESC
+      .slice(0, num_to_keep) # Keep `num_to_keep` recent entries
+      .to_h
 
     Application.logger.debug("GC: Reduced @@sync_times map to #{@@sync_times.keys.size}")
   end
