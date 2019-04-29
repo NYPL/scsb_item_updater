@@ -20,7 +20,9 @@ class SQSMessageHandler
     if old_enough? || process_immediately?
       @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
       if valid?
-        Resque.enqueue(ProcessResqueMessage, @message.body)
+        # Copy SQS-receive-time into message as "queued_at"
+        message_to_enqueue = JSON.parse(@message.body).merge({ queued_at: @message.attributes['ApproximateFirstReceiveTimestamp']}).to_json
+        Resque.enqueue(ProcessResqueMessage, message_to_enqueue)
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
       else
         @logger.error("Message '#{@message.body}' contains an unsupported action")
