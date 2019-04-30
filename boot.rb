@@ -37,6 +37,7 @@ Application.env = Application.settings['environment'] || 'development'
 # container dies.
 STDOUT.sync = true
 Application.logger = NyplLogFormatter.new(STDOUT)
+Application.logger.level = ENV['LOG_LEVEL'] || 'info'
 
 # Configure Redis
 Resque.redis = Application.settings['redis_domain_and_port']
