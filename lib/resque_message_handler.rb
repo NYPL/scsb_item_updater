@@ -14,9 +14,15 @@ class ResqueMessageHandler
 
   # TODO: Add logging of results here.
   def transfer
+    @logger.info "ResqueMessageHandler#transfer: start on barcodes #{@parsed_message['barcodes']}"
+    timer_start
+
     source_barcode_scsb_mapper = get_barcode_mapper
+    timer_start (subtask = "mapper.barcode_to_attributes_mapping")
     source_barcode_to_attributes_map = source_barcode_scsb_mapper.barcode_to_attributes_mapping
-    @logger.info "MAPPING of barcodes to: #{source_barcode_to_attributes_map}"
+    timer_stop subtask
+
+    @logger.info "ResqueMessageHandler#transfer: MAPPING of barcodes to: #{source_barcode_to_attributes_map}"
     item_transferer = ItemTransferer.new({
       api_url: @settings['scsb_api_url'],
       api_key: @settings['scsb_api_key'],
@@ -24,20 +30,30 @@ class ResqueMessageHandler
       destination_bib_id: @parsed_message['bibRecordNumber']
     })
 
+    timer_start (subtask = "item_transferer.transfer!")
     # TODO: possibly wrap this all in a is_dry_run
     item_transferer.transfer!
+    timer_stop subtask
 
     # don't send barcodes to SCSBXMLFetcher that errored in transfer
     item_transferer.errors.keys.each { |barcode| source_barcode_to_attributes_map.delete(barcode) }
 
     xml_fetcher = get_scsb_fetcher(source_barcode_to_attributes_map)
+
+    timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
     barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
+    timer_stop subtask
 
     submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+
+    timer_start (subtask = "submit_collection_updater.update_scsb_items")
     submit_collection_updater.update_scsb_items
+    timer_stop subtask
 
     refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
+    timer_start (subtask = "refiler.refile!")
     refiler.refile!
+    timer_stop subtask
 
     send_errors_for([
       source_barcode_scsb_mapper.errors,
@@ -46,22 +62,39 @@ class ResqueMessageHandler
       submit_collection_updater.errors,
       refiler.errors
     ])
+
+    ellapsed_time = timer_stop
+    @logger.info "ResqueMessageHandler#transfer: finished barcodes #{source_barcode_to_attributes_map.keys} in #{ellapsed_time['overall']}", action: 'transfer', ellapsed: ellapsed_time
   end
 
   def update
+    @logger.info "ResqueMessageHandler#update: start on barcodes #{@parsed_message['barcodes']}"
+    timer_start
+
     mapper = get_barcode_mapper
+
+    timer_start (subtask = "mapper.barcode_to_attributes_mapping")
     mapping = mapper.barcode_to_attributes_mapping
-    @logger.info "MAPPING of barcodes to: #{mapping}"
+    timer_stop subtask
+
+    @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{mapping}"
     xml_fetcher = get_scsb_fetcher(mapping)
 
+    timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
     barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
-    @logger.info "the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+    timer_stop subtask
+
+    @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
 
     submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+    timer_start (subtask = "submit_collection_updater.update_scsb_items")
     submit_collection_updater.update_scsb_items
+    timer_stop subtask
 
     refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
+    timer_start (subtask = "refiler.refile!")
     refiler.refile!
+    timer_stop subtask
 
     send_errors_for([
       mapper.errors,
@@ -69,6 +102,9 @@ class ResqueMessageHandler
       submit_collection_updater.errors,
       refiler.errors
     ])
+
+    ellapsed_time = timer_stop
+    @logger.info "ResqueMessageHandler#update: finished barcodes #{mapping.keys} in #{ellapsed_time['overall']}", action: 'update', ellapsed: ellapsed_time
   end
 
   private
@@ -135,4 +171,13 @@ class ResqueMessageHandler
     mailer.send_error_email
   end
 
+  def timer_start(task = "overall")
+    @ellapsed = {} if task == "overall"
+    @ellapsed[task] = Time.new
+  end
+
+  def timer_stop(task = "overall")
+    @ellapsed[task] = Time.new - @ellapsed[task]
+    @ellapsed
+  end
 end
