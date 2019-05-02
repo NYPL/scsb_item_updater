@@ -30,11 +30,20 @@ class ProcessResqueMessage
   # this tool synced them.
   def self.remove_redundant_barcodes (message)
     barcodes = message['barcodes']
-    queued_at = message['queued_at']
     queued_at = queued_at.to_i unless queued_at.nil?
+
+    # In order to process a current very large backlock of redis events that do
+    # not have the new 'queued_at' property saved, let's fall back on a
+    # reasonable default value for 'queued_at'. The safest choice is to set this
+    # to the maximum time it can possibly be, which is the time the 'queued_at'
+    # started being saved.
+    queued_at = Time.new(2019, 5, 2, 10, 30, 00, '-04:00').to_i if queued_at.nil?
+
     barcodes.select do |barcode|
       last_synced = last_sync_time barcode
-      keep = queued_at.nil? || last_synced.nil? || queued_at > last_synced
+      # Keep if 1) not synced in recent memory, or 2) queued after the most
+      # recent sync:
+      keep = last_synced.nil? || queued_at > last_synced
       Application.logger.debug("Skipping #{barcode} because it was written to SQS before the last sync for the same item", queued_at: queued_at, last_synced: last_synced ) if !keep
       keep
     end
