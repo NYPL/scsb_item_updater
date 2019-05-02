@@ -37,7 +37,6 @@ describe ProcessResqueMessage do
       barcodes = ProcessResqueMessage.remove_redundant_barcodes({ "barcodes" => ['012345'], "queued_at" => old_queued_at })
       expect(barcodes).to be_a(Array)
       expect(barcodes.size).to eq(0)
-
     end
 
     it "will retain barcodes that are not redundant" do
@@ -51,6 +50,31 @@ describe ProcessResqueMessage do
       expect(barcodes).to be_a(Array)
       expect(barcodes.size).to eq(1)
       expect(barcodes[0]).to eq('999999999')
+    end
+
+    it "will remove barcodes that were not added to redis with a queued_at" do
+      # Because
+      #  1. the de-duping functionality depends on a new "queued_at" property
+      #     having been written to the redis queue and
+      #  2. we have a large back log to work through right now that does not
+      #     include the queued_at property
+      # .. let's set a reasonable default for the 'queued_at' property when
+      # it's not found in redis queue entries. The maximum possible value for
+      # queued_at is the date the "queued_at" propert was deployed (2019-5-2
+      # 10:30am). This is not likely to be accurate; The real queue time is
+      # necessarily earlier (a lesser time value). Because we only process
+      # a given message if it appears to have been written to the queue *after*
+      # the last time we synced that item, the most conservative default is the
+      # maximum value possible. (i.e. this will err on the side of processing
+      # an event rather than skipping it)
+      #
+      # Here we're attempting to process a redis message for a barcode that we
+      # recently processed. Although the redis message does not include
+      # queued_at property, the default queued_at will cause the barcode to be
+      # removed:
+      barcodes = ProcessResqueMessage.remove_redundant_barcodes({ "barcodes" => ['012345'] })
+      expect(barcodes).to be_a(Array)
+      expect(barcodes.size).to eq(0)
     end
   end
 
