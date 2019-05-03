@@ -21,6 +21,8 @@ class SQSMessageHandler
       @logger.info "Message body: #{@message.body} with attributes #{@message.attributes} and user_attributes of #{@message.message_attributes}"
       if valid?
         # Copy SQS-receive-time into message as "queued_at"
+        # ApproximateFirstReceiveTimestamp is ms since epoch:
+        # https://docs.aws.amazon.com/AWSSimpleQueueService/latest/APIReference/API_ReceiveMessage.html
         message_to_enqueue = JSON.parse(@message.body).merge({ queued_at: @message.attributes['ApproximateFirstReceiveTimestamp']}).to_json
         Resque.enqueue(ProcessResqueMessage, message_to_enqueue)
         @sqs_client.delete_message(queue_url: @settings['sqs_queue_url'], receipt_handle: @message.receipt_handle)
