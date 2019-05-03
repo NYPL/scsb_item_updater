@@ -1,5 +1,12 @@
 require 'spec_helper'
 
+RSpec::Matchers.define :roughly_equivalant_sync_time_as_string do |expected|
+  match do |actual|
+    # sync times are roughly equiv if within 10ms of each other
+    (actual.to_f - expected.to_f).abs < 10
+  end
+end
+
 describe ProcessResqueMessage do
   before :each do
     @redis_client_double = instance_double(Redis)
@@ -17,7 +24,10 @@ describe ProcessResqueMessage do
 
   describe "#record_last_sync_times_for_barcodes" do
     it "will record current times for an array of barcodes" do
-      # expect(ProcessResqueMessage.class_eval('@@sync_times')).to be_a(Object)
+      expect(@redis_client_double).to receive(:set).with('sync-time-012345', roughly_equivalant_sync_time_as_string((Time.now.to_f * 1000).to_s))
+      expect(@redis_client_double).to receive(:expire).with('sync-time-012345', 60 * 60 * 24 * 7)
+
+      ProcessResqueMessage.record_last_sync_times_for_barcodes(['012345'])
     end
   end
 
