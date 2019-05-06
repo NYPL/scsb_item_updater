@@ -56,6 +56,12 @@ If it is, it's persisted into Redis and deleted from SQS.
 1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work`
 1.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
+Ad hoc testing of resque workers in isolation can be achieved by:
+
+ - Open one terminal with `QUEUE=* rake resque:work`
+ - Open another terminal tab with `irb -r './boot'` and add arbitrary resque messages like:
+   - `Resque.enqueue(ProcessResqueMessage, { "user_email" => "user@example.com", "barcodes" => [ "1234" ], "action" => "update", "queued_at" => Time.now.to_f * 100 }.to_json)`
+
 #### Running From Docker Locally
 
 You can use docker and [`docker-compose`](https://docs.docker.com/compose/overview/) to run the app locally too.
