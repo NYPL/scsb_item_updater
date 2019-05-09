@@ -77,6 +77,15 @@ class ResqueMessageHandler
     mapping = mapper.barcode_to_attributes_mapping
     timer_stop subtask
 
+    # Skip anything whose "availability" is not "Available"?
+    mapping = segment_by_availability(mapping)[:available]
+
+    # Log any item skipped due to unavailability in SCSB:
+    unavailable = segment_by_availability(mapping)[:unavailable]
+    @logger.debug "ResqueMessageHandler#update: Skipping updating the following unavailable barcodes: #{unavailable}" if ! unavailable.empty?
+
+    return if mapping.empty?
+
     @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{mapping}"
     xml_fetcher = get_scsb_fetcher(mapping)
 
@@ -108,6 +117,17 @@ class ResqueMessageHandler
   end
 
   private
+
+  # Given a hash relating barcodes to scsb items, returns a new hash with two 
+  # keys :available & :unavailable, each of which is a hash relating barcodes
+  # to scsb documents that are Available and Not Available respectively.
+  def segment_by_availability(barcode_mapping)
+    barcode_mapping.inject({ available: {}, unavailable: {}}) do |h, (barcode, item)|
+      group = if item['availability'] == 'Available' then :available else :unavailable end
+      h[group][barcode] = item
+      h
+    end
+  end
 
   def nypl_platform_client
     NyplPlatformClient.new({
