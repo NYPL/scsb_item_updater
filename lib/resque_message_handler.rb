@@ -78,10 +78,10 @@ class ResqueMessageHandler
     timer_stop subtask
 
     # Skip anything whose "availability" is not "Available"?
-    mapping = segment_by_availability(mapping)[:available]
+    mapping = select_by_status mapping, :available
 
     # Log any item skipped due to unavailability in SCSB:
-    unavailable = segment_by_availability(mapping)[:unavailable]
+    unavailable = select_by_status mapping, :unavailable
     @logger.debug "ResqueMessageHandler#update: Skipping updating the following unavailable barcodes: #{unavailable}" if ! unavailable.empty?
 
     return if mapping.empty?
@@ -118,14 +118,17 @@ class ResqueMessageHandler
 
   private
 
-  # Given a hash relating barcodes to scsb items, returns a new hash with two 
-  # keys :available & :unavailable, each of which is a hash relating barcodes
-  # to scsb documents that are Available and Not Available respectively.
-  def segment_by_availability(barcode_mapping)
-    barcode_mapping.inject({ available: {}, unavailable: {}}) do |h, (barcode, item)|
-      group = if item['availability'] == 'Available' then :available else :unavailable end
-      h[group][barcode] = item
-      h
+  # Given a hash relating barcodes to scsb items, returns a new hash consisting
+  # of only those items that have the named status (`:available` or
+  # `:unavailable`). To ensure a clean segmentation, we only match `:available`
+  # to `"availality": "Available"`
+  def select_by_status(barcode_mapping, status)
+    barcode_mapping.select do |barcode, item|
+      if status == :available
+        item['availability'] == 'Available'
+      else
+        item['availability'] != 'Available'
+      end
     end
   end
 

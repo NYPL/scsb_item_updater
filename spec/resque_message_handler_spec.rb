@@ -1,9 +1,9 @@
 require 'spec_helper'
 
 describe ResqueMessageHandler do
-  describe "#segment_by_availability" do
-    it "will segment barcode mapping by availability" do
-      mapping = {
+  describe "#select_by_status" do
+    let(:barcode_mapping) do
+      {
         "33433003517483" => {
           "barcode"=>"33433003517483",
           "availability"=>"Not Available"
@@ -17,25 +17,30 @@ describe ResqueMessageHandler do
           "availability"=>"Some Other Unrecognized Status"
         }
       }
+    end
 
-      segmented_mapping = ResqueMessageHandler.new.send :segment_by_availability, mapping
-      expect(segmented_mapping).to be_a(Hash)
-      expect(segmented_mapping.keys).to contain_exactly(:unavailable, :available)
-      expect(segmented_mapping[:available]).to be_a(Hash)
-      expect(segmented_mapping[:available].keys.size).to eq(1)
-      expect(segmented_mapping[:available].keys).to contain_exactly('33433003517484')
-      expect(segmented_mapping[:unavailable]).to be_a(Hash)
-      expect(segmented_mapping[:unavailable].keys.size).to eq(2)
-      expect(segmented_mapping[:unavailable].keys).to contain_exactly('33433003517483', '33433003517485')
 
-      # Assert segmented documents are correct:
-      available_barcodes = segmented_mapping[:available].map { |key, item| item['barcode'] }
-      unavailable_barcodes = segmented_mapping[:unavailable].map { |key, item| item['barcode'] }
+    it "will select available barcodes" do
+      mapping = ResqueMessageHandler.new.send :select_by_status, barcode_mapping, :available
+
+      expect(mapping).to be_a(Hash)
+      expect(mapping.keys).to contain_exactly('33433003517484')
+
+      available_barcodes = mapping.map { |key, item| item['barcode'] }
       expect(available_barcodes).to contain_exactly('33433003517484')
+    end
+
+    it "will select unavailable barcodes" do
+      mapping = ResqueMessageHandler.new.send :select_by_status, barcode_mapping, :unavailable
+
+      expect(mapping.keys.size).to eq(2)
+      expect(mapping.keys).to contain_exactly('33433003517483', '33433003517485')
+
+      unavailable_barcodes = mapping.map { |key, item| item['barcode'] }
       expect(unavailable_barcodes).to contain_exactly('33433003517483', '33433003517485')
     end
   end
-  
+
   describe "#update" do
     let(:scsb_xml_fetcher) { instance_double(SCSBXMLFetcher) }
     let(:submit_coll_updater) { instance_double(SubmitCollectionUpdater) }
