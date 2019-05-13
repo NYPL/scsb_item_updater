@@ -78,38 +78,44 @@ class ResqueMessageHandler
     timer_stop subtask
 
     # Skip anything whose "availability" is not "Available"?
-    mapping = select_by_status mapping, :available
+    available = select_by_status mapping, :available
 
     # Log any item skipped due to unavailability in SCSB:
     unavailable = select_by_status mapping, :unavailable
     @logger.debug "ResqueMessageHandler#update: Skipping updating the following unavailable barcodes: #{unavailable}" if ! unavailable.empty?
 
-    return if mapping.empty?
+    # Create hash mapping barcodes to "Not Available" errors:
+    non_availability_errors = unavailable.keys.reduce({}) { |h, barcode| h.merge Hash[barcode, ['Item is not "Available" in SCSB']] }
 
-    @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{mapping}"
-    xml_fetcher = get_scsb_fetcher(mapping)
+    # Does mapping still contain work to do after removing unavailable items?
+    if ! available.empty?
+      @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{available}"
 
-    timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
-    barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
-    timer_stop subtask
+      xml_fetcher = get_scsb_fetcher(available)
+      timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
+      barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
+      timer_stop subtask
 
-    @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+      @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
 
-    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
-    timer_start (subtask = "submit_collection_updater.update_scsb_items")
-    submit_collection_updater.update_scsb_items
-    timer_stop subtask
+      submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+      timer_start (subtask = "submit_collection_updater.update_scsb_items")
+      submit_collection_updater.update_scsb_items
+      timer_stop subtask
 
-    refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
-    timer_start (subtask = "refiler.refile!")
-    refiler.refile!
-    timer_stop subtask
+      refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
+      timer_start (subtask = "refiler.refile!")
+      refiler.refile!
+      timer_stop subtask
+    end
 
+    # Email requester:
     send_errors_for([
       mapper.errors,
-      xml_fetcher.errors,
-      submit_collection_updater.errors,
-      refiler.errors
+      xml_fetcher ? xml_fetcher.errors : {},
+      submit_collection_updater ? submit_collection_updater.errors : {},
+      refiler ? refiler.errors : {},
+      non_availability_errors
     ])
 
     ellapsed_time = timer_stop

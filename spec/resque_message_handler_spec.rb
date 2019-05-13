@@ -1,6 +1,13 @@
 require 'spec_helper'
 
 describe ResqueMessageHandler do
+  let(:mock_error_mailer) { instance_double(ErrorMailer) }
+
+  before :each do
+    allow(ErrorMailer).to receive(:new).and_return(mock_error_mailer)
+    allow(mock_error_mailer).to receive(:send_error_email)
+  end
+
   describe "#select_by_status" do
     let(:barcode_mapping) do
       {
@@ -78,6 +85,9 @@ describe ResqueMessageHandler do
         expect(scsb_xml_fetcher).to_not receive(:translate_to_scsb_xml)
         expect(submit_coll_updater).to_not receive(:update_scsb_items)
         expect(refiler).to_not receive(:refile!)
+        # Expect ErrorMailer to be initialized with an error_hashes that
+        # contains the specific non-availability error we're constructing:
+        expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => array_including({"1234"=>["Item is not \"Available\" in SCSB"]})))
 
         handler.handle
       end
@@ -101,6 +111,10 @@ describe ResqueMessageHandler do
         expect(scsb_xml_fetcher).to receive(:translate_to_scsb_xml)
         expect(submit_coll_updater).to receive(:update_scsb_items)
         expect(refiler).to receive(:refile!)
+
+        # ErrorMailer is instantiated when there are no errors, but
+        # error_hashes contains just empty hashes
+        expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => [{}, {}, {}, {}, {}]))
 
         handler.handle
       end
