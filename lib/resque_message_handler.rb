@@ -77,30 +77,45 @@ class ResqueMessageHandler
     mapping = mapper.barcode_to_attributes_mapping
     timer_stop subtask
 
-    @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{mapping}"
-    xml_fetcher = get_scsb_fetcher(mapping)
+    # Skip anything whose "availability" is not "Available"?
+    available = select_by_status mapping, :available
 
-    timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
-    barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
-    timer_stop subtask
+    # Log any item skipped due to unavailability in SCSB:
+    unavailable = select_by_status mapping, :unavailable
+    @logger.debug "ResqueMessageHandler#update: Skipping updating the following unavailable barcodes: #{unavailable}" if ! unavailable.empty?
 
-    @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+    # Create hash mapping barcodes to "Not Available" errors:
+    non_availability_errors = unavailable.keys.reduce({}) { |h, barcode| h.merge Hash[barcode, ['Item is not "Available" in SCSB']] }
 
-    submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
-    timer_start (subtask = "submit_collection_updater.update_scsb_items")
-    submit_collection_updater.update_scsb_items
-    timer_stop subtask
+    # Does mapping still contain work to do after removing unavailable items?
+    if ! available.empty?
+      @logger.debug "ResqueMessageHandler#update: MAPPING of barcodes to: #{available}"
 
-    refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
-    timer_start (subtask = "refiler.refile!")
-    refiler.refile!
-    timer_stop subtask
+      xml_fetcher = get_scsb_fetcher(available)
+      timer_start (subtask = "xml_fetcher.translate_to_scsb_xml")
+      barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
+      timer_stop subtask
 
+      @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+
+      submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
+      timer_start (subtask = "submit_collection_updater.update_scsb_items")
+      submit_collection_updater.update_scsb_items
+      timer_stop subtask
+
+      refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
+      timer_start (subtask = "refiler.refile!")
+      refiler.refile!
+      timer_stop subtask
+    end
+
+    # Email requester:
     send_errors_for([
       mapper.errors,
-      xml_fetcher.errors,
-      submit_collection_updater.errors,
-      refiler.errors
+      xml_fetcher ? xml_fetcher.errors : {},
+      submit_collection_updater ? submit_collection_updater.errors : {},
+      refiler ? refiler.errors : {},
+      non_availability_errors
     ])
 
     ellapsed_time = timer_stop
@@ -108,6 +123,20 @@ class ResqueMessageHandler
   end
 
   private
+
+  # Given a hash relating barcodes to scsb items, returns a new hash consisting
+  # of only those items that have the named status (`:available` or
+  # `:unavailable`). To ensure a clean segmentation, we only match `:available`
+  # to `"availality": "Available"`
+  def select_by_status(barcode_mapping, status)
+    barcode_mapping.select do |barcode, item|
+      if status == :available
+        item['availability'] == 'Available'
+      else
+        item['availability'] != 'Available'
+      end
+    end
+  end
 
   def nypl_platform_client
     NyplPlatformClient.new({
