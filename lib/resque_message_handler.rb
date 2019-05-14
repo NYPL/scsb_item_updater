@@ -125,22 +125,25 @@ class ResqueMessageHandler
   private
 
   # Given a hash relating barcodes to scsb items, returns a new hash consisting
-  # of only those items that are either:
-  #  1. Available
-  #  2. Incomplete
-  # These are the classes of records we're able to update.
+  # of only those items that we anticipate succeeding a SCSB update
   def get_barcodes_allowing_updates(barcode_mapping)
     barcode_mapping.select do |barcode, item|
-      item['availability'] == 'Available' || item['title'] == 'Dummy Title'
+      scsb_update_possible_for_item item
     end
   end
 
   # Get inverse of get_barcodes_allowing_updates
   def get_barcodes_disallowing_updates(barcode_mapping)
-    allowed = get_barcodes_allowing_updates barcode_mapping
-    # Build hash from difference obtained by deleting everything from
-    # `barcode_mapping` that exists in `allowed`:
-    Hash[*(barcode_mapping.to_a - allowed.to_a).flatten]
+    barcode_mapping.reject do |barcode, item|
+      scsb_update_possible_for_item item
+    end
+  end
+
+  # Returns true if given scsb item should succeed an update, i.e. it is either:
+  #  1. Available
+  #  2. Incomplete
+  def scsb_update_possible_for_item (item)
+    item['availability'] == 'Available' || item['title'] == 'Dummy Title'
   end
 
   def nypl_platform_client
