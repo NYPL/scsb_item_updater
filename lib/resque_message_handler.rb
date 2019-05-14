@@ -78,10 +78,10 @@ class ResqueMessageHandler
     timer_stop subtask
 
     # Skip anything whose "availability" is not "Available"?
-    available = select_by_status mapping, :available
+    available = get_barcodes_allowing_updates mapping
 
     # Log any item skipped due to unavailability in SCSB:
-    unavailable = select_by_status mapping, :unavailable
+    unavailable = get_barcodes_disallowing_updates mapping
     @logger.debug "ResqueMessageHandler#update: Skipping updating the following unavailable barcodes: #{unavailable}" if ! unavailable.empty?
 
     # Create hash mapping barcodes to "Not Available" errors:
@@ -125,17 +125,22 @@ class ResqueMessageHandler
   private
 
   # Given a hash relating barcodes to scsb items, returns a new hash consisting
-  # of only those items that have the named status (`:available` or
-  # `:unavailable`). To ensure a clean segmentation, we only match `:available`
-  # to `"availality": "Available"`
-  def select_by_status(barcode_mapping, status)
+  # of only those items that are either:
+  #  1. Available
+  #  2. Incomplete
+  # These are the classes of records we're able to update.
+  def get_barcodes_allowing_updates(barcode_mapping)
     barcode_mapping.select do |barcode, item|
-      if status == :available
-        item['availability'] == 'Available'
-      else
-        item['availability'] != 'Available'
-      end
+      item['availability'] == 'Available' || item['title'] == 'Dummy Title'
     end
+  end
+
+  # Get inverse of get_barcodes_allowing_updates
+  def get_barcodes_disallowing_updates(barcode_mapping)
+    allowed = get_barcodes_allowing_updates barcode_mapping
+    # Build hash from difference obtained by deleting everything from
+    # `barcode_mapping` that exists in `allowed`:
+    Hash[*(barcode_mapping.to_a - allowed.to_a).flatten]
   end
 
   def nypl_platform_client

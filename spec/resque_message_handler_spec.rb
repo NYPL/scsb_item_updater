@@ -8,7 +8,7 @@ describe ResqueMessageHandler do
     allow(mock_error_mailer).to receive(:send_error_email)
   end
 
-  describe "#select_by_status" do
+  describe "#get_barcodes_allowing_updates" do
     let(:barcode_mapping) do
       {
         "33433003517483" => {
@@ -22,23 +22,28 @@ describe ResqueMessageHandler do
         "33433003517485" => {
           "barcode"=>"33433003517485",
           "availability"=>"Some Other Unrecognized Status"
+        },
+        "33433003517486" => {
+          "barcode"=>"33433003517486",
+          "availability"=>"Not Available",
+          "title"=>"Dummy Title"
         }
+
       }
     end
 
-
     it "will select available barcodes" do
-      mapping = ResqueMessageHandler.new.send :select_by_status, barcode_mapping, :available
+      mapping = ResqueMessageHandler.new.send :get_barcodes_allowing_updates, barcode_mapping
 
       expect(mapping).to be_a(Hash)
-      expect(mapping.keys).to contain_exactly('33433003517484')
+      expect(mapping.keys).to contain_exactly('33433003517484', '33433003517486')
 
       available_barcodes = mapping.map { |key, item| item['barcode'] }
-      expect(available_barcodes).to contain_exactly('33433003517484')
+      expect(available_barcodes).to contain_exactly('33433003517484', '33433003517486')
     end
 
     it "will select unavailable barcodes" do
-      mapping = ResqueMessageHandler.new.send :select_by_status, barcode_mapping, :unavailable
+      mapping = ResqueMessageHandler.new.send :get_barcodes_disallowing_updates, barcode_mapping
 
       expect(mapping.keys.size).to eq(2)
       expect(mapping.keys).to contain_exactly('33433003517483', '33433003517485')
