@@ -112,7 +112,7 @@ describe ResqueMessageHandler do
 
         # ErrorMailer is instantiated when there are no errors, but
         # error_hashes contains just empty hashes
-        expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => [{}, {}, {}, {}, {}]))
+        expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => [{}, {}, {}, {}]))
 
         handler.handle
       end
