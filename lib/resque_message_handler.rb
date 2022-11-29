@@ -109,7 +109,6 @@ class ResqueMessageHandler
       mapper.errors,
       xml_fetcher ? xml_fetcher.errors : {},
       submit_collection_updater ? submit_collection_updater.errors : {},
-      refiler ? refiler.errors : {},
       non_availability_errors
     ])
 
