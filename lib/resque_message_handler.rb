@@ -102,11 +102,6 @@ class ResqueMessageHandler
       timer_start (subtask = "submit_collection_updater.update_scsb_items")
       submit_collection_updater.update_scsb_items
       timer_stop subtask
-
-      refiler = get_refiler(map_barcodes_for_refile(barcode_to_scsb_xml_mapping, submit_collection_updater.errors))
-      timer_start (subtask = "refiler.refile!")
-      refiler.refile!
-      timer_stop subtask
     end
 
     # Email requester:
