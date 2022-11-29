@@ -56,7 +56,6 @@ describe ResqueMessageHandler do
   describe "#update" do
     let(:scsb_xml_fetcher) { instance_double(SCSBXMLFetcher) }
     let(:submit_coll_updater) { instance_double(SubmitCollectionUpdater) }
-    let(:refiler ) { instance_double(Refiler) }
 
     before :each do
       allow(scsb_xml_fetcher).to receive(:translate_to_scsb_xml).and_return({ "1234" => 'ex em el' })
@@ -66,10 +65,6 @@ describe ResqueMessageHandler do
       allow(submit_coll_updater).to receive(:update_scsb_items).and_return(nil)
       allow(submit_coll_updater).to receive(:errors).and_return({})
       allow(SubmitCollectionUpdater).to receive(:new).and_return(submit_coll_updater)
-
-      allow(refiler).to receive(:refile!).and_return(nil)
-      allow(refiler).to receive(:errors).and_return({})
-      allow(Refiler).to receive(:new).and_return(refiler)
     end
 
     describe 'for unavailable barcode' do
@@ -86,10 +81,9 @@ describe ResqueMessageHandler do
         message = { "barcodes" => [ '1234' ], "user_email" => "user@example.com", "action" => "update" }
         handler = ResqueMessageHandler.new(message: message, settings: settings)
 
-        # Expect neither scsb-xml to be built, nor xml sent, nor refile called!
+        # Expect neither scsb-xml to be built, nor xml sent!
         expect(scsb_xml_fetcher).to_not receive(:translate_to_scsb_xml)
         expect(submit_coll_updater).to_not receive(:update_scsb_items)
-        expect(refiler).to_not receive(:refile!)
         # Expect ErrorMailer to be initialized with an error_hashes that
         # contains the specific non-availability error we're constructing:
         expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => array_including({"1234"=>["Item is not \"Available\" in SCSB"]})))
@@ -107,15 +101,14 @@ describe ResqueMessageHandler do
         allow(BarcodeToScsbAttributesMapper).to receive(:new).and_return(barcode_mapper)
       end
 
-      it "will update and refile barcodes that are not available" do
+      it "will update barcodes that are not available" do
         settings = {}
         message = { "barcodes" => [ '1234' ], "user_email" => "user@example.com", "action" => "update" }
         handler = ResqueMessageHandler.new(message: message, settings: settings)
 
-        # Expect scsb-xml to be built, xml sent, and refile called:
+        # Expect scsb-xml to be built, xml sent:
         expect(scsb_xml_fetcher).to receive(:translate_to_scsb_xml)
         expect(submit_coll_updater).to receive(:update_scsb_items)
-        expect(refiler).to receive(:refile!)
 
         # ErrorMailer is instantiated when there are no errors, but
         # error_hashes contains just empty hashes
@@ -126,4 +119,3 @@ describe ResqueMessageHandler do
     end
   end
 end
-
