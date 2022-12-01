@@ -56,6 +56,12 @@ If it is, it's persisted into Redis and deleted from SQS.
 1. `ruby ./dequeue_from_sqs.rb` and in another tab...`QUEUE=* rake resque:work`
 1.  Make sure the environment variable of `IS_DRY_RUN` is set correctly. If set to false, it will update the incomplete barcodes with SCSBXML in the assigned ReCap environment. If set to true, it will run the script without updating the barcodes.
 
+Ad hoc testing of resque workers in isolation can be achieved by:
+
+ - Open one terminal with `QUEUE=* rake resque:work`
+ - Open another terminal tab with `irb -r './boot'` and add arbitrary resque messages like:
+   - `Resque.enqueue(ProcessResqueMessage, { "user_email" => "user@example.com", "barcodes" => [ "1234" ], "action" => "update", "queued_at" => Time.now.to_f * 100 }.to_json)`
+
 #### Running From Docker Locally
 
 You can use docker and [`docker-compose`](https://docs.docker.com/compose/overview/) to run the app locally too.
@@ -119,3 +125,24 @@ Merging `development` => `production` automatically deploys to the production en
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
 The approach is inspired by [this blog post](https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/) ([google cached version](https://webcache.googleusercontent.com/search?q=cache:NodZ-GZnk6YJ:https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/+&cd=1&hl=en&ct=clnk&gl=us&client=firefox-b-1-ab)).
+
+### Environmental Variable Config in Deployed Components
+
+All config may be managed via AWS console
+ * [QA cluster](https://console.aws.amazon.com/ecs/home?region=us-east-1#/clusters/scsb-item-updater-qa/services)
+ * [Production cluster](https://console.aws.amazon.com/ecs/home?region=us-east-1#/clusters/scsb-item-updater-production/services)
+
+To edit environmental variables:
+1. Create a Task Definition Revision
+  - Navigate to "Tasks" tab
+  - Follow "scsb-item-updater..." link under "Task definition" column
+  - Click "Create new revision"
+  - Under "Container Definitions" follow either the "scsb_item_updater_sqs_consumer" or "scsb_item_updater_redis_consumer" link depending on if you need to update config for the component that reads jobs off the external SQS or the component that processes jobs from the internal Redis (although they appear to have a lot of the same config)
+  - Make your changes in the resulting "Edit Container" modal and finish by clicking "Update"
+  - Create your revision via "Create" button
+2. Activate the new task definition version
+  - Navigate to "Services" tab
+  - Enable the checkbox next to the sole service
+  - Click "Update"
+  - Select your new version under "Task Definition > Revision"
+  - Follow "Next Step" through several pages to save.

@@ -35,8 +35,10 @@ class ErrorMailer
   end
 
   def all_errors
+    # Set default entry for each barcode to []
     result = Hash.new {|hash, key| hash[key] = []}
 
+    # Concat all errors together for each barcode:
     @error_hashes.each do |error_hash|
       error_hash.each do |barcode, messages|
         result[barcode] += messages

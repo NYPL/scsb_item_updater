@@ -12,13 +12,36 @@ class BarcodeToScsbAttributesMapper
     @api_key  = options[:api_key]
   end
 
-  # owningInstitutionItemId
+  # Build (and return) a hash mapping each valid barcode to result documents obtained via scsb api
+  # Result resembles:
+  #   {
+  #     "33433003517483" => {
+  #       "owningInstitutionBibId"=>".b118910711",
+  #       "callNumber"=>"JFM 94-354",
+  #       "chronologyAndEnum"=>"v. 1-2 spring 1979-summer 1980",
+  #       "customerCode"=>"NA",
+  #       "barcode"=>"33433003517483",
+  #       "useRestriction"=>"In Library Use",
+  #       "collectionGroupDesignation"=>"Shared",
+  #       "availability"=>"Not Available",
+  #       "selectedItem"=>false,
+  #       "itemId"=>12144407,
+  #       "owningInstitutionItemId"=>".i104645660",
+  #       "owningInstitutionHoldingsId"=>"76cf109b-91cc-4f21-b199-b95f77bc9f2b"
+  #     },
+  #     ...
+  #   }
+  # Any unmatched barcodes will not be returned (but noted in @errors
   def barcode_to_attributes_mapping
     @results = find_all_barcodes(@barcodes)
   end
 
-private
+  private
 
+  # Given an array of barcodes, returns a hash mapping barcodes to result
+  # documents obtained via scsb api query (searching first "incomplete"
+  # followed by "complete"). Failed lookups are not included in returned hash
+  # (but are noted in @errors hash).
   def find_all_barcodes(barcodes)
     results = []
     found_barcodes = []
@@ -59,6 +82,11 @@ private
     result
   end
 
+  # Given an array of barcodes, a request options hash, and an initial result
+  # hash, returns a hash consisting of all barcodes mapped to results obtained
+  # via scsb api query. The "options" param indicates `search_type` to control
+  # whether this is a standard or incomplete ("dummy") search. Any barcode
+  # lookup that fails will not be included in returned hash.
   def recursively_call(barcodes, options = {}, result = {})
     begin
       response = HTTParty.post("#{@api_url}/searchService/search", headers: auth_headers, body: barcode_request_body(options[:search_type], barcodes.join(','), options[:page_number]))
@@ -81,6 +109,9 @@ private
     end
   end
 
+  # Given "row" (an entry in a SCSB api result) and "result" (a hash built by
+  # merging the result of several calls to this function) modifies "result" 
+  # hash to include the relevant barcode mapped to relevant entry
   def process_row_to_result(row, result)
     # guard against the off-chance SCSB returns barcode that wasn't requested
     if @barcodes.include? row['barcode']
