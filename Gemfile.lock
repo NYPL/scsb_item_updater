@@ -17,7 +17,8 @@ GEM
     dotenv (2.2.1)
     faraday (0.12.2)
       multipart-post (>= 1.2, < 3)
-    httparty (0.15.6)
+    httparty (0.21.0)
+      mini_mime (>= 1.0.0)
       multi_xml (>= 0.5.2)
     jmespath (1.4.0)
     jwt (1.5.6)
@@ -83,7 +84,7 @@ PLATFORMS
 DEPENDENCIES
   aws-sdk-sqs (~> 1.6)
   dotenv (~> 2.2, >= 2.2.1)
-  httparty (~> 0.15.6)
+  httparty (~> 0.21.0)
   mail (~> 2.6, >= 2.6.3)
   nokogiri (~> 1.8.4)
   nypl_log_formatter (~> 0.1.2)
