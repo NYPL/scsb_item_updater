@@ -6,20 +6,20 @@ if [ -z "$TRAVIS_PULL_REQUEST" ] || [ "$TRAVIS_PULL_REQUEST" == "false" ]; then
 
     case "$TRAVIS_BRANCH" in
       production)
-        AWS_ACCESS_KEY_ID=$aws_access_key_id_production
-        AWS_SECRET_ACCESS_KEY=$aws_secret_access_key_production
+        AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PRODUCTION
+        AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PRODUCTION
         CLUSTER_NAME=$CLUSTER_NAME_PRODUCTION
         SERVICE_NAME=$SERVICE_NAME_PRODUCTION
         ;;
       qa)
-        AWS_ACCESS_KEY_ID=$aws_access_key_id_production
-        AWS_SECRET_ACCESS_KEY=$aws_secret_access_key_production
+        AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_QA
+        AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_QA
         CLUSTER_NAME=$CLUSTER_NAME_QA
         SERVICE_NAME=$SERVICE_NAME_QA
         ;;
       *)
-        AWS_ACCESS_KEY_ID=$aws_access_key_id_development
-        AWS_SECRET_ACCESS_KEY=$aws_secret_access_key_development
+        AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_DEVELOPMENT
+        AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_DEVELOPMENT
         CLUSTER_NAME=$CLUSTER_NAME_DEVELOPMENT
         SERVICE_NAME=$SERVICE_NAME_DEVELOPMENT
         ;;

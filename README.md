@@ -108,6 +108,8 @@ Our branches (in order or stability are):
 | qa          | qa          | nypl-digital-dev |
 | production  | production  | nypl-digital-dev |
 
+We use the workflow [PRs Target Main, Merge to Deployment Branches](https://github.com/NYPL/engineering-general/blob/master/standards/git-workflow.md#prs-target-main-merge-to-deployment-branches)
+
 ### Cutting A Feature Branch
 
 1. Feature branches are cut from `master`.
@@ -120,8 +122,29 @@ Merging to certain branches automatically deploys to the environment associated 
 that branch.
 
 Merging `master` => `development` automatically deploys to the development environment. (after tests pass).  
-Merging `development` => `production` automatically deploys to the production environment. (after tests pass).
+Merging `master` => `production` automatically deploys to the production environment. (after tests pass).
 
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
 The approach is inspired by [this blog post](https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/) ([google cached version](https://webcache.googleusercontent.com/search?q=cache:NodZ-GZnk6YJ:https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/+&cd=1&hl=en&ct=clnk&gl=us&client=firefox-b-1-ab)).
+
+### Environmental Variable Config in Deployed Components
+
+All config may be managed via AWS console
+ * [QA cluster](https://console.aws.amazon.com/ecs/home?region=us-east-1#/clusters/scsb-item-updater-qa/services)
+ * [Production cluster](https://console.aws.amazon.com/ecs/home?region=us-east-1#/clusters/scsb-item-updater-production/services)
+
+To edit environmental variables:
+1. Create a Task Definition Revision
+  - Navigate to "Tasks" tab
+  - Follow "scsb-item-updater..." link under "Task definition" column
+  - Click "Create new revision"
+  - Under "Container Definitions" follow either the "scsb_item_updater_sqs_consumer" or "scsb_item_updater_redis_consumer" link depending on if you need to update config for the component that reads jobs off the external SQS or the component that processes jobs from the internal Redis (although they appear to have a lot of the same config)
+  - Make your changes in the resulting "Edit Container" modal and finish by clicking "Update"
+  - Create your revision via "Create" button
+2. Activate the new task definition version
+  - Navigate to "Services" tab
+  - Enable the checkbox next to the sole service
+  - Click "Update"
+  - Select your new version under "Task Definition > Revision"
+  - Follow "Next Step" through several pages to save.
