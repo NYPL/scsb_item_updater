@@ -108,6 +108,8 @@ Our branches (in order or stability are):
 | qa          | qa          | nypl-digital-dev |
 | production  | production  | nypl-digital-dev |
 
+We use the workflow [PRs Target Main, Merge to Deployment Branches](https://github.com/NYPL/engineering-general/blob/master/standards/git-workflow.md#prs-target-main-merge-to-deployment-branches)
+
 ### Cutting A Feature Branch
 
 1. Feature branches are cut from `master`.
@@ -120,7 +122,7 @@ Merging to certain branches automatically deploys to the environment associated 
 that branch.
 
 Merging `master` => `development` automatically deploys to the development environment. (after tests pass).  
-Merging `development` => `production` automatically deploys to the production environment. (after tests pass).
+Merging `master` => `production` automatically deploys to the production environment. (after tests pass).
 
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
