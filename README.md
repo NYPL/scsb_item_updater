@@ -35,6 +35,20 @@ This application...
 1.  `SQSMessageHandler` makes sure that a message is well formed & old enough to be worked.  
 If it is, it's persisted into Redis and deleted from SQS.
 
+Messages read off Redis look like this:
+
+```
+{ "user_email": "email@xample.com", "barcodes": ["33433132060058"], "action": "update" }
+```
+
+If the message contains a "source" of "bib-item-store-update", the job will be processed immediately rather than waiting 1hr:
+
+```
+{ "user_email": "email@xample.com", "barcodes": ["33433132060058"], "action": "update", "source": "bib-item-store-update" }
+```
+
+If you need to debug a processing issue without using SCSBuster or incurring the 1hr delay, you can write messages resembling the above to the [qa](https://console.aws.amazon.com/sqs/v2/home?region=us-east-1#/queues/https%3A%2F%2Fsqs.us-east-1.amazonaws.com%2F946183545209%2Fsierra-updates-for-scsb-qa/send-receive) or [production](https://console.aws.amazon.com/sqs/v2/home?region=us-east-1#/queues/https%3A%2F%2Fsqs.us-east-1.amazonaws.com%2F946183545209%2Fsierra-updates-for-scsb-production/send-receive) queues directly.
+
 #### Working Redis
 
 1.  `ProcessResqueMessage`, a [resque job](https://github.com/resque/resque#overview), uses an instance of `ResqueMessageHandler` do all the hard work.
@@ -108,6 +122,8 @@ Our branches (in order or stability are):
 | qa          | qa          | nypl-digital-dev |
 | production  | production  | nypl-digital-dev |
 
+We use the workflow [PRs Target Main, Merge to Deployment Branches](https://github.com/NYPL/engineering-general/blob/master/standards/git-workflow.md#prs-target-main-merge-to-deployment-branches)
+
 ### Cutting A Feature Branch
 
 1. Feature branches are cut from `master`.
@@ -120,7 +136,7 @@ Merging to certain branches automatically deploys to the environment associated 
 that branch.
 
 Merging `master` => `development` automatically deploys to the development environment. (after tests pass).  
-Merging `development` => `production` automatically deploys to the production environment. (after tests pass).
+Merging `master` => `production` automatically deploys to the production environment. (after tests pass).
 
 For insight into how CD works look at [.travis.yml](./.travis.yml) and the
 [continuous_deployment](./continuous_deployment) directory.
