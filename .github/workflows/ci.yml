@@ -29,6 +29,6 @@ jobs:
       - name: build and test
         run: |
           touch config/.env
-          docker-compose build
+          docker build -t scsb_item_updater:latest .
           docker-compose up -d
           docker-compose exec -T scsb_item_updater-work_sqs_messages-1 bash -c 'bundle install --with development test && RAILS_ENV=test bundle exec rspec'
