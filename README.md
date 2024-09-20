@@ -1,12 +1,5 @@
 # SCSB Item Updater
 
-| Branch        | Status                                                                                                                                                   |
-|:--------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `master`      | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=master)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)      |
-| `development` | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=development)](https://travis-ci.org/NYPL-discovery/scsb_item_updater) |
-| `qa`          | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=qa)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)          |
-| `production`  | [![Build Status](https://travis-ci.org/NYPL-discovery/scsb_item_updater.svg?branch=production)](https://travis-ci.org/NYPL-discovery/scsb_item_updater)  |
-
 This app consumes messages produced by [NYPL/nypl-recap-admin](https://github.com/NYPL/nypl-recap-admin).  
 It pushes updated item information (from our platform) into SCSB's system via
 SCSB's API.
@@ -61,8 +54,8 @@ If you need to debug a processing issue without using SCSBuster or incurring the
 #### Setup
 
 1.  Ensure you have Redis installed & running on your machine (`brew install redis`)
-1.  `cp ./config/.env.example ./config/.env`
-1.  `gem install bundler --version 1.16.1`
+1.  `cp ./config/.env.example ./config/.env` (and fill in the values)
+1.  `gem install bundler --version 2.5.11`
 1.  `bundle install`
 
 #### Running Natively Locally
@@ -117,8 +110,6 @@ Our branches (in order or stability are):
 
 | Branch      | Environment | AWS Account      |
 |:------------|:------------|:-----------------|
-| master      | none        | none             |
-| development | development | nypl-sandbox     |
 | qa          | qa          | nypl-digital-dev |
 | production  | production  | nypl-digital-dev |
 
@@ -126,21 +117,19 @@ We use the workflow [PRs Target Main, Merge to Deployment Branches](https://gith
 
 ### Cutting A Feature Branch
 
-1. Feature branches are cut from `master`.
-2. Once the feature branch is ready to be merged, file a pull request of the branch _into_ master.
+1. Feature branches are cut from `qa`.
+2. Once the feature branch is ready to be merged, open a pull request of the branch _into_ qa.
 
 ### Deploying
 
-We use Travis for continuous deployment.
+We use GitHub Actions for continuous deployment.
 Merging to certain branches automatically deploys to the environment associated to
 that branch.
 
-Merging `master` => `development` automatically deploys to the development environment. (after tests pass).  
-Merging `master` => `production` automatically deploys to the production environment. (after tests pass).
+Merging `feature` => `qa` automatically deploys to the qa environment.
+Merging `qa` => `production` automatically deploys to the production environment.
 
-For insight into how CD works look at [.travis.yml](./.travis.yml) and the
-[continuous_deployment](./continuous_deployment) directory.
-The approach is inspired by [this blog post](https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/) ([google cached version](https://webcache.googleusercontent.com/search?q=cache:NodZ-GZnk6YJ:https://dev.mikamai.com/2016/05/17/continuous-delivery-with-travis-and-ecs/+&cd=1&hl=en&ct=clnk&gl=us&client=firefox-b-1-ab)).
+Please backmerge production into qa after a release.
 
 ### Environmental Variable Config in Deployed Components
 
