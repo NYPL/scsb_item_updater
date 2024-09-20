@@ -29,6 +29,11 @@ jobs:
       - name: build and test
         run: |
           touch config/.env
+          echo "ENVIRONMENT=test" >> config/.env
+          echo "SQS_QUEUE_URL=https://www.example.com" >> config/.env
+          echo "AWS_KEY=fake-key" >> config/.env
+          echo "AWS_SECRET=fake-secret" >> config/.env
+          echo "AWS_REGION=us-east-1" >> config/.env
           docker build -t scsb_item_updater:latest .
           docker-compose up -d
-          docker-compose exec -T scsb_item_updater-work_sqs_messages-1 bash -c 'bundle install --with development test && RAILS_ENV=test bundle exec rspec'
+          docker-compose exec -T work_sqs_messages bash -c 'bundle install --with development test && RAILS_ENV=test bundle exec rspec'
