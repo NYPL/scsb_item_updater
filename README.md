@@ -104,6 +104,15 @@ This [Stack Overflow thread](http://stackoverflow.com/questions/8798357/inspect-
 end
 ```
 
+## Running Unit Tests
+You can run the unit tests natively if you have the necessary dependencies installed. The docker containers are not really set up to do this, but one can still be used by following these steps:
+```
+> docker-compose up -d
+> docker-compose exec work_sqs_messages bash
+> bundle install --with development test
+> RAILS_ENV=test bundle exec rspec
+```
+
 ## Git Workflow & Deployment
 
 Our branches (in order or stability are):
