@@ -39,4 +39,4 @@ jobs:
 
       - name: Force ECS Update
         run: |
-          aws ecs update-service --cluster scsb-item-updater-qa --service scsbuster-item-updater-qa --force-new-deployment
+          aws ecs update-service --cluster scsb-item-updater-qa --service scsb-item-updater-qa --force-new-deployment
