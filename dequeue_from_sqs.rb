@@ -5,6 +5,9 @@ settings = Application.settings
 # Configure SQS Client
 if Application.env == 'production'
   sqs_client = Aws::SQS::Client.new(region: 'us-east-1')
+elsif Application.env == 'test'
+  Aws.config.update(stub_responses: true)
+  sqs_client = Aws::SQS::Client.new(stub_responses: true)
 else
   credentials = Aws::Credentials.new(settings['aws_key'], settings['aws_secret'])
   sqs_client = Aws::SQS::Client.new(region: 'us-east-1', credentials: credentials)
