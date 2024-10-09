@@ -10,6 +10,7 @@ require 'mail'
 require 'erb'
 require 'yaml'
 require 'nypl_log_formatter'
+require 'ostruct'
 require 'resque'
 
 Dir.glob('./lib/*.rb').each do |file|
