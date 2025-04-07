@@ -189,17 +189,23 @@ class ResqueMessageHandler
   end
 
   def send_errors_for(errors = [])
-    mailer = ErrorMailer.new(
-      error_hashes: errors,
-      sqs_message: @parsed_message,
-      from_address:  @settings['email_from_address'],
-      cc_addresses:  @settings['email_cc_addresses'],
-      mailer_domain: @settings['smtp_domain'],
-      mailer_username: @settings['smtp_user_name'],
-      mailer_password: @settings['smtp_password'],
-      environment: @settings['environment']
-    )
-    mailer.send_error_email
+    # If source of the sqs message was a update in bib/item services, don't notify anyone by email:
+    if @parsed_message['source'] == 'bib-item-store-update'
+      @logger.info "ResqueMessageHandler: Note update failure: #{JSON.dump(errors)}"
+
+    else
+      mailer = ErrorMailer.new(
+        error_hashes: errors,
+        sqs_message: @parsed_message,
+        from_address:  @settings['email_from_address'],
+        cc_addresses:  @settings['email_cc_addresses'],
+        mailer_domain: @settings['smtp_domain'],
+        mailer_username: @settings['smtp_user_name'],
+        mailer_password: @settings['smtp_password'],
+        environment: @settings['environment']
+      )
+      mailer.send_error_email
+    end
   end
 
   def timer_start(task = "overall")
