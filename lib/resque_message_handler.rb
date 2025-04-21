@@ -96,7 +96,7 @@ class ResqueMessageHandler
       barcode_to_scsb_xml_mapping = xml_fetcher.translate_to_scsb_xml
       timer_stop subtask
 
-      @logger.info "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
+      @logger.debug "ResqueMessageHandler#update: the barcode to SCSBXML matching is #{barcode_to_scsb_xml_mapping}"
 
       submit_collection_updater = get_submit_collection_updater(barcode_to_scsb_xml_mapping)
       timer_start (subtask = "submit_collection_updater.update_scsb_items")
@@ -191,7 +191,8 @@ class ResqueMessageHandler
   def send_errors_for(errors = [])
     # If source of the sqs message was a update in bib/item services, don't notify anyone by email:
     if @parsed_message['source'] == 'bib-item-store-update'
-      @logger.info "ResqueMessageHandler: Note update failure: #{JSON.dump(errors)}"
+      has_errors = !errors.find { |e| !e.empty? }.nil?
+      @logger.info "ResqueMessageHandler: Note update failure: #{JSON.dump(errors)}" if has_errors
 
     else
       mailer = ErrorMailer.new(
