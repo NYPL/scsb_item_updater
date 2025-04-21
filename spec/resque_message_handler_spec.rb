@@ -118,4 +118,42 @@ describe ResqueMessageHandler do
       end
     end
   end
+
+  describe 'send_errors_for' do
+    let(:barcode_mapper) { instance_double(BarcodeToScsbAttributesMapper) }
+    settings = {}
+    message = nil
+
+    before :each do
+      # Mock a barcode availability response:
+      # Item 1234 is 'Not available':
+      allow(barcode_mapper).to receive(:barcode_to_attributes_mapping).and_return({ "1234" => { "availability" => "Not Available" } })
+      allow(barcode_mapper).to receive(:errors).and_return({})
+      allow(BarcodeToScsbAttributesMapper).to receive(:new).and_return(barcode_mapper)
+
+      message = { "barcodes" => [ '1234' ], "user_email" => "user@example.com", "action" => "update" }
+    end
+
+    it "when source == bib-item-store-update, do not send email on failure" do
+      # When source=bib-item-store-update, the update/transfer job was auto
+      # generated from catalog updates; Do not notify anyone by email of these
+      # errors as they are frequent and not interesting.
+      message['source'] = 'bib-item-store-update'
+      handler = ResqueMessageHandler.new(message: message, settings: settings)
+
+      # Asert ErrorMail not be instantiated at all:
+      expect(ErrorMailer).to_not receive(:new)
+
+      handler.handle
+    end
+
+    it "when source != bib-item-store-update, do not send email on failure" do
+      handler = ResqueMessageHandler.new(message: message, settings: settings)
+
+      # Assert an error email notification is instantiated for this failure:
+      expect(ErrorMailer).to receive(:new).with(hash_including(:error_hashes => array_including({"1234"=>["Item is not \"Available\" in SCSB"]})))
+
+      handler.handle
+    end
+  end
 end
