@@ -191,7 +191,8 @@ class ResqueMessageHandler
   def send_errors_for(errors = [])
     # If source of the sqs message was a update in bib/item services, don't notify anyone by email:
     if @parsed_message['source'] == 'bib-item-store-update'
-      has_errors = !errors.find { |e| !e.empty? }.nil?
+      # Check doubly nested array for any errors:
+      has_errors = errors.any? { |e| e.any? }
       @logger.info "ResqueMessageHandler: Note update failure: #{JSON.dump(errors)}" if has_errors
 
     else
